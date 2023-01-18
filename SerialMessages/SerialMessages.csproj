@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Atec.InterfaceSerializer\Atec.InterfaceSerializer.csproj" />
+    <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj" />
   </ItemGroup>
 
 </Project>

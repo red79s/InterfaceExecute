@@ -1,5 +1,5 @@
-﻿using Atec.InterfaceSerializer;
-using Atec.InterfaceSerializer.DataPacket;
+﻿using Eloe.InterfaceSerializer;
+using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

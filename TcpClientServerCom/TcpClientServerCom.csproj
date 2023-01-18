@@ -60,10 +60,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Atec.InterfaceSerializer\Atec.InterfaceSerializer.csproj">
-      <Project>{74b04d93-06f5-4687-a152-e0c666837057}</Project>
-      <Name>Atec.InterfaceSerializer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SerialMessages\SerialMessages.csproj">
       <Project>{7a8aeb18-a588-4529-9a93-611ac967b88a}</Project>
       <Name>SerialMessages</Name>
