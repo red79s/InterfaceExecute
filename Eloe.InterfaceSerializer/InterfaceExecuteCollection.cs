@@ -1,44 +1,43 @@
-﻿using Eloe.InterfaceSerializer;
-using Eloe.InterfaceSerializer.DataPacket;
+﻿using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Eloe.InterfaceRpc
+namespace Eloe.InterfaceSerializer
 {
-    public class InterfaceRpcServer
+    public class InterfaceExecuteCollection
     {
-        private readonly IInterfaceComunicationChannelServer _comunicationChannel;
+        public EventHandler<SendDataInfo> OnSendData;
+
         private readonly IDataPacketFactory _dataPacketFactory;
         private readonly ILogger _logger;
         private Dictionary<string, IInterfaceExecute> _implementedInterfaces = new Dictionary<string, IInterfaceExecute>();
         private Dictionary<string, IInterfaceExecute> _clientInterfaces = new Dictionary<string, IInterfaceExecute>();
-        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues = 
+        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues =
             new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>>();
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
-        public InterfaceRpcServer(IInterfaceComunicationChannelServer comunicationChannel, 
+        public InterfaceExecuteCollection(
             IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {
-            _comunicationChannel = comunicationChannel;
             _dataPacketFactory = dataPacketFactory;
             _logger = logger;
-            _comunicationChannel.OnMessageReceived += _comunicationChannel_OnMessageReceived;
         }
 
-        private void _comunicationChannel_OnMessageReceived(object sender, MessageReceivedArgs e)
+        private void MessageReceived(string clientId, byte[] data)
         {
-            var packet = _dataPacketFactory.DecodeDataPacket(e.Data);
-            switch (packet.PackageType) 
+            var packet = _dataPacketFactory.DecodeDataPacket(data);
+            switch (packet.PackageType)
             {
                 case DataPacketType.FunctionCall:
-                    HandleFunctionCall(_dataPacketFactory.DecodeFunctionCall(packet.Data), e.ClientId); 
+                    HandleFunctionCall(_dataPacketFactory.DecodeFunctionCall(packet.Data), clientId);
                     break;
                 case DataPacketType.FunctionReturn:
-                    HandleFunctionReturnCall(_dataPacketFactory.DecodeFunctionReturnCall(packet.Data), e.ClientId);
+                    HandleFunctionReturnCall(_dataPacketFactory.DecodeFunctionReturnCall(packet.Data), clientId);
                     break;
                 default:
                     throw new Exception("Invalid DataPackageType: " + packet.PackageType);
@@ -114,7 +113,7 @@ namespace Eloe.InterfaceRpc
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
             _comunicationChannel.SendAsync(null, package);
             var t = new TaskCompletionSource<FunctionReturnDataPacketInfo>();
-            
+
             lock (_lockObj)
             {
                 _waitingForReturnValues.Add(id, t);
@@ -134,4 +133,5 @@ namespace Eloe.InterfaceRpc
             context.ReturnValue = t.Task.Result.ReturnValue;
         }
     }
+}
 }

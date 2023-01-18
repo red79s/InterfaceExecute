@@ -57,11 +57,6 @@ namespace Eloe.InterfaceSerializer
 
             if (method.ReturnType == typeof(Task))
             {
-                if (method.ReturnTypeGenericType != null)
-                {
-                    var b = method.ReturnTypeGenericType;
-                }
-
                 var taskCompleter = new TaskCompletionSource<object>();
                 invocation.ReturnValue = taskCompleter.Task;
                 Task.Run(() =>
