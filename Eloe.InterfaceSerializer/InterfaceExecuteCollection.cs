@@ -56,7 +56,7 @@ namespace Eloe.InterfaceSerializer
             var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters);
 
             var returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, res, null);
-            _comunicationChannel.SendAsync("a", returnPackage);
+            OnSendData?.Invoke(this, new SendDataInfo { ClientId = clientId, Data = returnPackage });
         }
 
         private void HandleFunctionReturnCall(FunctionReturnDataPacketInfo packet, string clientId)
