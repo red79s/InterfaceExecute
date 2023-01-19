@@ -78,15 +78,16 @@ namespace Eloe.InterfaceRpc
         private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
             var id = _nextFunctionId++;
-            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
-            OnSendData?.Invoke(this, new SendDataInfo { ClientId = null, Data = package });
-            var t = new TaskCompletionSource<FunctionReturnDataPacketInfo>();
 
+            var t = new TaskCompletionSource<FunctionReturnDataPacketInfo>();
             lock (_lockObj)
             {
                 _waitingForReturnValues.Add(id, t);
             }
 
+            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
+            OnSendData?.Invoke(this, new SendDataInfo { ClientId = null, Data = package });
+          
             var notTimeout = t.Task.Wait(_functionReturnWaitTime);
             if (!notTimeout)
             {

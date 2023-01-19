@@ -46,7 +46,7 @@ namespace Eloe.InterfaceRpc
                     returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, "", $"Received call for class: {package.ClassName} that have no registered implementations");
                 }
 
-                if (returnPackage != null)
+                if (returnPackage == null)
                 {
                     try
                     {

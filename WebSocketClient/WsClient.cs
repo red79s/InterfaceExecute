@@ -15,7 +15,7 @@ namespace WebSocketClient
         public event EventHandler<MessageReceivedClientArgs> OnMessageReceived;
 
         public WsClient(ILogger logger)
-            : base(null, logger)
+            : base(null, logger, true)
         {
         }
 
@@ -33,10 +33,9 @@ namespace WebSocketClient
         private void _client_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             OnMessageReceived?.Invoke(this, new MessageReceivedClientArgs { Data = e.Data.ToArray() });
-            Console.WriteLine("Received data: " + Encoding.UTF8.GetString(e.Data.ToArray()));
         }
 
-        public Task SendAsync(byte[] data)
+        public Task<bool> SendAsync(byte[] data)
         {
             return _client.SendAsync(data);
         }

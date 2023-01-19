@@ -1,12 +1,18 @@
-﻿using System.Text;
+﻿using Eloe.InterfaceRpc;
+using Eloe.InterfaceSerializer;
+using System.Text;
 using WatsonWebsocket;
 
 namespace WebSocketServer
 {
-    internal class WsServer
+    internal class WsServer : InterfaceRpcServer, IInterfaceComunicationChannelServer
     {
-        WatsonWsServer _server;
-        public WsServer(string hostname, int port)
+        private WatsonWsServer _server;
+
+        public event EventHandler<MessageReceivedServerArgs>? OnMessageReceived;
+
+        public WsServer(string hostname, int port, ILogger logger)
+            : base(null, logger, true)
         {
             _server = new WatsonWsServer(hostname, port);
             _server.MessageReceived += _server_MessageReceived;
@@ -14,16 +20,23 @@ namespace WebSocketServer
             _server.ClientDisconnected += (s, e) => Console.WriteLine("Client disconnected");
         }
 
-        private void _server_MessageReceived(object? sender, MessageReceivedEventArgs e)
-        {
-            var data = Encoding.UTF8.GetString(e.Data);
-            Console.WriteLine("Recived message: " + data);
-            _server.SendAsync(e.Client.Guid, Encoding.UTF8.GetBytes("Response: " + data));
-        }
-
         public void Start()
         {
             _server.Start();
+        }
+
+        private void _server_MessageReceived(object? sender, MessageReceivedEventArgs e)
+        {
+            OnMessageReceived?.Invoke(this, new MessageReceivedServerArgs { ClientId = e.Client.Guid.ToString(), Data = e.Data.ToArray() });
+        }
+
+        public Task<bool> SendAsync(string client, byte[] data)
+        {
+            if (string.IsNullOrEmpty(client))
+                throw new ArgumentOutOfRangeException(nameof(client));
+
+            var guid = Guid.Parse(client);
+            return _server.SendAsync(guid, data);
         }
     }
 }

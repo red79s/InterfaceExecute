@@ -81,7 +81,6 @@ namespace Eloe.InteraceSerializerTests
 
             var res = i.SendMessage("a");
             res.Wait();
-            var a = "abc";
         }
 
         [TestMethod]
@@ -99,6 +98,7 @@ namespace Eloe.InteraceSerializerTests
             var res = i.SendMessage("a", 1);
             res.Wait();
             var a = res.Result;
+            Assert.AreEqual(true, a);
         }
     }
 }

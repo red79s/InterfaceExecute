@@ -43,9 +43,9 @@ namespace Eloe.InteraceSerializerTests
             return Task.CompletedTask;
         }
 
-        public async Task<bool> SendMessage(string message, int num)
+        public Task<bool> SendMessage(string message, int num)
         {
-            return num > 0;
+            return Task<bool>.Run(() => true);
         }
     }
 }

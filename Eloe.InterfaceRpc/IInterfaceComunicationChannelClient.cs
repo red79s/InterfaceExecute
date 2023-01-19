@@ -6,6 +6,6 @@ namespace Eloe.InterfaceRpc
     public interface IInterfaceComunicationChannelClient : IInterfaceComunicationChannel
     {
         event EventHandler<MessageReceivedClientArgs> OnMessageReceived;
-        Task SendAsync(byte[] data);
+        Task<bool> SendAsync(byte[] data);
     }
 }

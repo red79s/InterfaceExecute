@@ -19,8 +19,17 @@ namespace WebSocketClient
             while (true)
             {
                 var m = Console.ReadLine();
-                var res = serverFunctions.Ping(pingNum++);
-                Console.WriteLine($"Ping result: {res}");
+                try
+                {
+                    var res = serverFunctions.Ping(pingNum++);
+                    Console.WriteLine($"Ping result: {res}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+               
+                serverFunctions.WriteMessage(m);
             }
         }
     }
