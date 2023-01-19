@@ -30,7 +30,7 @@ namespace Eloe.InteraceSerializerTests
 
         private InterfaceRpcServer CreateServer()
         {
-            return new InterfaceRpcServer(_communicationChannelMock.Object, _dataPacketFactory, _loggerMock.Object);
+            return new InterfaceRpcServer(_communicationChannelMock.Object, _loggerMock.Object);
         }
 
         [TestMethod]
@@ -41,7 +41,7 @@ namespace Eloe.InteraceSerializerTests
             server.ImplementInterface<ITestInterface>(impl);
 
             var package = _dataPacketFactory.CreateFunctionCall(1, typeof(ITestInterface).FullName, "SetItem", "{\"item\": \"abc\"}");
-            _communicationChannelMock.Raise(x => x.OnMessageReceived += null, null, new MessageReceivedArgs { Data = package });
+            _communicationChannelMock.Raise(x => x.OnMessageReceived += null, null, new MessageReceivedServerArgs { Data = package });
 
             _communicationChannelMock.Verify(x => x.SendAsync(It.IsAny<string>(), It.IsAny<byte[]>()));
         }
@@ -60,7 +60,7 @@ namespace Eloe.InteraceSerializerTests
 
             _communicationChannelMock.Verify(x => x.SendAsync(It.IsAny<string>(), It.IsAny<byte[]>()));
             var returnPackage = _dataPacketFactory.CreateFuctionReturnCall(1, "", "");
-            _communicationChannelMock.Raise(x => x.OnMessageReceived += null, null, new MessageReceivedArgs { Data = returnPackage });
+            _communicationChannelMock.Raise(x => x.OnMessageReceived += null, null, new MessageReceivedServerArgs { Data = returnPackage });
             Thread.Sleep(1000);
             Assert.IsTrue(functionReturned);
         }

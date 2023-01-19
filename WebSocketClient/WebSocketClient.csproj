@@ -54,5 +54,19 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClientServerComDef\ClientServerComDef.csproj">
+      <Project>{d654bbe4-ab49-439c-96e7-175a3de6c674}</Project>
+      <Name>ClientServerComDef</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Eloe.InterfaceRpc\Eloe.InterfaceRpc.csproj">
+      <Project>{3512f3ef-79da-455c-aeb6-dbdb9881a92c}</Project>
+      <Name>Eloe.InterfaceRpc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj">
+      <Project>{2a322f36-0350-45f9-9d68-86fa49df22dd}</Project>
+      <Name>Eloe.InterfaceSerializer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

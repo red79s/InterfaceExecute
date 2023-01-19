@@ -1,26 +1,24 @@
-﻿using Eloe.InterfaceSerializer.DataPacket;
+﻿using Eloe.InterfaceSerializer;
+using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Eloe.InterfaceSerializer
+namespace Eloe.InterfaceRpc
 {
-    public class InterfaceExecuteCollection
+    public class InterfaceRpcSendCollection
     {
         public EventHandler<SendDataInfo> OnSendData;
 
         private readonly IDataPacketFactory _dataPacketFactory;
         private readonly ILogger _logger;
-        private Dictionary<string, IInterfaceExecute> _implementedInterfaces = new Dictionary<string, IInterfaceExecute>();
-        private Dictionary<string, IInterfaceExecute> _clientInterfaces = new Dictionary<string, IInterfaceExecute>();
+        private Dictionary<string, IInterfaceExecute> _proxyInterfaces = new Dictionary<string, IInterfaceExecute>();
         private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues =
             new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>>();
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
-        public InterfaceExecuteCollection(
+        public InterfaceRpcSendCollection(
             IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {
@@ -28,38 +26,19 @@ namespace Eloe.InterfaceSerializer
             _logger = logger;
         }
 
-        private void MessageReceived(string clientId, byte[] data)
+        public void MessageReceived(string clientId, DataPacketInfo dataPacket)
         {
-            var packet = _dataPacketFactory.DecodeDataPacket(data);
-            switch (packet.PackageType)
+            switch (dataPacket.PackageType)
             {
-                case DataPacketType.FunctionCall:
-                    HandleFunctionCall(_dataPacketFactory.DecodeFunctionCall(packet.Data), clientId);
-                    break;
                 case DataPacketType.FunctionReturn:
-                    HandleFunctionReturnCall(_dataPacketFactory.DecodeFunctionReturnCall(packet.Data), clientId);
+                    HandleFunctionReturnCall(clientId, _dataPacketFactory.DecodeFunctionReturnCall(dataPacket.Data));
                     break;
                 default:
-                    throw new Exception("Invalid DataPackageType: " + packet.PackageType);
+                    throw new Exception($"Invalid package type: {dataPacket.PackageType}");
             }
         }
 
-        private void HandleFunctionCall(FunctionDataPacketInfo package, string clientId)
-        {
-            var impl = _implementedInterfaces.FirstOrDefault(x => x.Key == package.ClassName);
-            if (impl.Key == null)
-            {
-                _logger.Warn($"Received call for class: {package.ClassName} that have no registered implementations");
-                return;
-            }
-
-            var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters);
-
-            var returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, res, null);
-            OnSendData?.Invoke(this, new SendDataInfo { ClientId = clientId, Data = returnPackage });
-        }
-
-        private void HandleFunctionReturnCall(FunctionReturnDataPacketInfo packet, string clientId)
+        private void HandleFunctionReturnCall(string clientId, FunctionReturnDataPacketInfo packet)
         {
             TaskCompletionSource<FunctionReturnDataPacketInfo> taskCompletionSource = null;
 
@@ -82,32 +61,21 @@ namespace Eloe.InterfaceSerializer
             }
         }
 
-        public void ImplementInterface<U>(U instance) where U : class
-        {
-            var iExec = new InterfaceExecute<U>(instance);
-            if (_implementedInterfaces.ContainsKey(iExec.InterfaceFullName))
-            {
-                throw new Exception($"Interface: {iExec.InterfaceFullName} can only be implemented once");
-            }
-
-            _implementedInterfaces.Add(iExec.InterfaceFullName, iExec);
-        }
-
-        public U AddClientCallbackInterface<U>() where U : class
+        public U AddProxyCallbackInterface<U>() where U : class
         {
             var iExec = new InterfaceExecute<U>();
-            if (_clientInterfaces.ContainsKey(iExec.InterfaceFullName))
+            if (_proxyInterfaces.ContainsKey(iExec.InterfaceFullName))
             {
                 throw new Exception($"Interface: {iExec.InterfaceFullName} can only be added once");
             }
 
-            iExec.OnExecute += HandleClientCallbackOnExecute;
-            _clientInterfaces.Add(iExec.InterfaceFullName, iExec);
+            iExec.OnExecute += HandleProxyCallbackOnExecute;
+            _proxyInterfaces.Add(iExec.InterfaceFullName, iExec);
             return iExec.GetInterface();
         }
 
         private volatile int _nextFunctionId = 1;
-        private void HandleClientCallbackOnExecute(object sender, SerializedExecutionContext context)
+        private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
             var id = _nextFunctionId++;
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
