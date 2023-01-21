@@ -11,17 +11,24 @@ internal class Program
         var logger = new Logger();
         var server = new WsServer("localhost", 9000, logger);
         server.ImplementInterface<IServerFunctions>(new ServerInterfaceImpl());
+        //var clientCallback = server.AddClientCallbackInterface<IClientCallbackFunctions>("client1");
         server.Start();
         Console.WriteLine("Server started");
-        Console.ReadKey();
+
+        int counter = 1;
+        while (true)
+        {
+            Console.ReadKey();
+            //clientCallback.DispalayMessage(new MessageInfo { Message = $"Message from server: {counter++}", Name = "server" });
+        }
     }
 
     private class ServerInterfaceImpl : IServerFunctions
     {
         public int Ping(int id)
         {
-            if (id % 4 == 0)
-                throw new Exception("Invalid number");
+            //if (id % 4 == 0)
+            //    throw new Exception("Invalid number");
             return id + 1;
         }
 

@@ -15,9 +15,10 @@ namespace Eloe.InterfaceRpc
         private InterfaceRpcReceiveCollection _receiveCollection;
         private InterfaceRpcSendCollection _sendCollection;
 
-        public InterfaceRpcServer(IInterfaceComunicationChannelServer comunicationChannel, ILogger logger, bool logComunication = false)
+        public InterfaceRpcServer(IInterfaceComunicationChannelServer comunicationChannel,ILogger logger, bool logComunication = false)
         {
             _dataPacketFactory = new DataPacketFactory(new DataPacketEncoding(), new FunctionDataPacketEncoding(), new FunctionReturnDataPacketEncoding());
+
 
             _receiveCollection = new InterfaceRpcReceiveCollection(_dataPacketFactory, logger);
             _receiveCollection.OnSendData += HandleOnSendData;
@@ -31,6 +32,7 @@ namespace Eloe.InterfaceRpc
             }
 
             _logger = logger;
+
             _logComunication = logComunication;
             _comunicationChannel.OnMessageReceived += _comunicationChannel_OnMessageReceived;
         }
@@ -94,9 +96,9 @@ namespace Eloe.InterfaceRpc
             _receiveCollection.ImplementInterface(instance);
         }
 
-        public U AddClientCallbackInterface<U>() where U : class
+        public U AddClientCallbackInterface<U>(string clientId) where U : class
         {
-            return _sendCollection.AddProxyCallbackInterface<U>();
+            return _sendCollection.AddProxyCallbackInterface<U>(clientId);
         }
     }   
 }

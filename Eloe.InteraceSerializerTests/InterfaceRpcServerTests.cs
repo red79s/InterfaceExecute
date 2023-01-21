@@ -3,10 +3,6 @@ using Eloe.InterfaceSerializer;
 using Eloe.InterfaceSerializer.DataPacket;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +26,7 @@ namespace Eloe.InteraceSerializerTests
 
         private InterfaceRpcServer CreateServer()
         {
-            return new InterfaceRpcServer(_communicationChannelMock.Object, _loggerMock.Object);
+            return new InterfaceRpcServer(_communicationChannelMock.Object, _loggerMock.Object, true);
         }
 
         [TestMethod]
@@ -50,7 +46,7 @@ namespace Eloe.InteraceSerializerTests
         public void TestInvokeClientFunction()
         {
             var server = CreateServer();
-            var cliInterface = server.AddClientCallbackInterface<ITestInterface>();
+            var cliInterface = server.AddClientCallbackInterface<ITestInterface>("client1");
             var functionReturned = false;
             Task.Run(() =>
             {

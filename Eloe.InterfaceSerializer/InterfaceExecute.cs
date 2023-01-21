@@ -13,26 +13,28 @@ namespace Eloe.InterfaceSerializer
         public EventHandler<SerializedExecutionContext> OnExecute;
         public EventHandler<EventInvokeData> OnEventInvoked;
 
+        public Type InterfaceType { get; private set; }
         public List<MethodInf> Methods { get; }
         public string InterfaceName { get; private set; }
         public string InterfaceFullName { get; private set; }
         private readonly T _instance;
         private IParameterSerializer _parameterSerializer = new ParameterConvert();
+        public string ClientId { get; set; }
 
         public InterfaceExecute(T instance)
         {
-            var type = typeof(T);
-            InterfaceName = type.Name;
-            InterfaceFullName = type.FullName;
+            InterfaceType = typeof(T);
+            InterfaceName = InterfaceType.Name;
+            InterfaceFullName = InterfaceType.FullName;
             _instance = instance;
             Methods = GetMethodAndTypeInfo(instance);
         }
 
         public InterfaceExecute()
         {
-            var type = typeof(T);
-            InterfaceName = type.Name;
-            InterfaceFullName = type.FullName;
+            InterfaceType = typeof(T);
+            InterfaceName = InterfaceType.Name;
+            InterfaceFullName = InterfaceType.FullName;
             Methods = GetMethodAndTypeInfo();
         }
 
@@ -52,7 +54,8 @@ namespace Eloe.InterfaceSerializer
                 ExecutePath = method.Name,
                 Payload = _parameterSerializer.Serialize(method.Parameters, invocation.Arguments.ToList()),
                 HaveReturnValue = method.ReturnType != typeof(void),
-                ReturnType = method.ReturnType
+                ReturnType = method.ReturnType,
+                ClientId = ClientId
             };
 
             if (method.ReturnType == typeof(Task))

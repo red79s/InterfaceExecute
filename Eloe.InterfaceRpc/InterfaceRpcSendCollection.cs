@@ -2,6 +2,7 @@
 using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
@@ -12,7 +13,7 @@ namespace Eloe.InterfaceRpc
 
         private readonly IDataPacketFactory _dataPacketFactory;
         private readonly ILogger _logger;
-        private Dictionary<string, IInterfaceExecute> _proxyInterfaces = new Dictionary<string, IInterfaceExecute>();
+        private List<IInterfaceExecute> _proxyInterfaces = new List<IInterfaceExecute>();
         private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues =
             new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>>();
         private object _lockObj = new object();
@@ -61,17 +62,26 @@ namespace Eloe.InterfaceRpc
             }
         }
 
-        public U AddProxyCallbackInterface<U>() where U : class
+        public U AddProxyCallbackInterface<U>(string clientId = null) where U : class
         {
-            var iExec = new InterfaceExecute<U>();
-            if (_proxyInterfaces.ContainsKey(iExec.InterfaceFullName))
-            {
-                throw new Exception($"Interface: {iExec.InterfaceFullName} can only be added once");
-            }
+            var existing = _proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId && x.InterfaceType == typeof(U));
+            if (existing != null)
+                return (U)existing;
 
+            var iExec = new InterfaceExecute<U>();
+            iExec.ClientId = clientId;
             iExec.OnExecute += HandleProxyCallbackOnExecute;
-            _proxyInterfaces.Add(iExec.InterfaceFullName, iExec);
+            _proxyInterfaces.Add(iExec);
             return iExec.GetInterface();
+        }
+
+        public void RemoveProxyCallbackInterface(string clientId)
+        {
+            var iExe = _proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId);
+            if (iExe != null)
+            {
+                _proxyInterfaces.Remove(iExe);
+            }
         }
 
         private volatile int _nextFunctionId = 1;
@@ -86,8 +96,8 @@ namespace Eloe.InterfaceRpc
             }
 
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
-            OnSendData?.Invoke(this, new SendDataInfo { ClientId = null, Data = package });
-          
+            OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
+
             var notTimeout = t.Task.Wait(_functionReturnWaitTime);
             if (!notTimeout)
             {

@@ -1,13 +1,24 @@
 ﻿using Eloe.InterfaceRpc;
 using Eloe.InterfaceSerializer;
-using System.Text;
 using WatsonWebsocket;
 
 namespace WebSocketServer
 {
-    internal class WsServer : InterfaceRpcServer, IInterfaceComunicationChannelServer
+    internal class WsServer : InterfaceRpcServer, IInterfaceComunicationChannelServer, IServerInfo
     {
         private WatsonWsServer _server;
+
+        public List<string> ConnectedClientIds
+        {
+            get
+            {
+                if (_server != null)
+                {
+                    return _server.ListClients().Select(c => c.Guid.ToString()).ToList();
+                }
+                return new List<string>();
+            }
+        }
 
         public event EventHandler<MessageReceivedServerArgs>? OnMessageReceived;
 
