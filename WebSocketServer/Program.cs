@@ -19,7 +19,12 @@ internal class Program
         while (true)
         {
             Console.ReadKey();
-            //clientCallback.DispalayMessage(new MessageInfo { Message = $"Message from server: {counter++}", Name = "server" });
+            var clients = server.GetConnectedClients();
+            foreach (var client in clients)
+            {
+                var clientCallback = server.AddClientCallbackInterface<IClientCallbackFunctions>(client.ClientId);
+                clientCallback.DispalayMessage(new MessageInfo { Message = $"Message from server: {counter++}", Name = "server" });
+            }
         }
     }
 

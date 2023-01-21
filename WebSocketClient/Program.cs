@@ -12,6 +12,7 @@ namespace WebSocketClient
             var logger = new Logger();
             var client = new WsClient(logger);
             var serverFunctions = client.AddServerInterface<IServerFunctions>();
+            client.ImplementInterface<IClientCallbackFunctions>(new ClientCallbackImpl());
             client.Connect("localhost", 9000);
             Console.WriteLine("connected");
 
@@ -31,6 +32,15 @@ namespace WebSocketClient
                
                 serverFunctions.WriteMessage(m);
             }
+        }
+    }
+
+    internal class ClientCallbackImpl : IClientCallbackFunctions
+    {
+        public bool DispalayMessage(MessageInfo mi)
+        {
+            Console.WriteLine($"Received callback: {mi.Name}, {mi.Message}");
+            return true;
         }
     }
 

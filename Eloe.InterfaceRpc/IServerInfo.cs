@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Eloe.InterfaceRpc
 {
     public interface IServerInfo
     {
-        List<string> ConnectedClientIds { get; }
+        event EventHandler<ClientInfo> OnClientConnected;
+        event EventHandler<ClientInfo> OnClientDisconnected;
+        List<ClientInfo> GetConnectedClients();
     }
 }

@@ -64,9 +64,9 @@ namespace Eloe.InterfaceRpc
 
         public U AddProxyCallbackInterface<U>(string clientId = null) where U : class
         {
-            var existing = _proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId && x.InterfaceType == typeof(U));
-            if (existing != null)
-                return (U)existing;
+            var iExeExisting = (InterfaceExecute<U>)_proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId && x.InterfaceType == typeof(U));
+            if (iExeExisting != null)
+                return iExeExisting.GetInterface();
 
             var iExec = new InterfaceExecute<U>();
             iExec.ClientId = clientId;
@@ -75,12 +75,13 @@ namespace Eloe.InterfaceRpc
             return iExec.GetInterface();
         }
 
-        public void RemoveProxyCallbackInterface(string clientId)
+        public void RemoveProxyCallbackInterface<U>(string clientId) where U : class
         {
-            var iExe = _proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId);
+            var iExe = (InterfaceExecute<U>)_proxyInterfaces.FirstOrDefault(x => x.ClientId == clientId && x.InterfaceType == typeof(U));
             if (iExe != null)
             {
                 _proxyInterfaces.Remove(iExe);
+                iExe.OnExecute -= HandleProxyCallbackOnExecute;
             }
         }
 

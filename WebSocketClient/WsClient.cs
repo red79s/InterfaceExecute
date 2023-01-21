@@ -2,20 +2,17 @@
 using Eloe.InterfaceSerializer;
 using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WatsonWebsocket;
 
 namespace WebSocketClient
 {
-    internal class WsClient : InterfaceRpcClient, IInterfaceComunicationChannelClient
+    internal class WsClient : InterfaceRpcClientBase
     {
         private WatsonWsClient _client;
 
-        public event EventHandler<MessageReceivedClientArgs> OnMessageReceived;
-
         public WsClient(ILogger logger)
-            : base(null, logger, true)
+            : base(logger, true)
         {
         }
 
@@ -32,12 +29,12 @@ namespace WebSocketClient
 
         private void _client_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            OnMessageReceived?.Invoke(this, new MessageReceivedClientArgs { Data = e.Data.ToArray() });
+            OnMessageReceived(new MessageReceivedClientArgs { Data = e.Data.ToArray() });
         }
 
-        public Task<bool> SendAsync(byte[] data)
+        protected override Task<bool> SendAsync(SendDataInfo e)
         {
-            return _client.SendAsync(data);
+            return _client.SendAsync(e.Data);
         }
     }
 }
