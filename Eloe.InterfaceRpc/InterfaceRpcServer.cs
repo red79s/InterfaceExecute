@@ -59,7 +59,7 @@ namespace Eloe.InterfaceRpc
             }
         }
 
-        private void LogReceivedPacket(DataPacketInfo dataPacket)
+        private void LogReceivedPacket(DataPacket dataPacket)
         {
             if (dataPacket == null)
             {

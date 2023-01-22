@@ -1,6 +1,6 @@
 ﻿namespace Eloe.InterfaceSerializer.DataPacket
 {
-    public class FunctionReturnDataPacketInfo
+    public class FunctionReturnDataPacket
     {
         public int Id { get; set; }
         public string ReturnValue { get; set; }

@@ -40,7 +40,7 @@ namespace Eloe.InterfaceSerializer.DataPacket
             return index + data.Length;
         }
 
-        public FunctionDataPacketInfo Decode(byte[] data)
+        public FunctionDataPacket Decode(byte[] data)
         {
             int index = 0;
             var id = BitConverter.ToInt32(data, index);
@@ -57,7 +57,7 @@ namespace Eloe.InterfaceSerializer.DataPacket
             index += 4;
             var functionParameters = GetString(data, index, functionParametersLength);
 
-            return new FunctionDataPacketInfo
+            return new FunctionDataPacket
             {
                 Id = id,
                 ClassName = className,

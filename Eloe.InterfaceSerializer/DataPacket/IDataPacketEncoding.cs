@@ -2,7 +2,7 @@
 {
     public interface IDataPacketEncoding
     {
-        DataPacketInfo Decode(byte[] buffer);
+        DataPacket Decode(byte[] buffer);
         byte[] Encode(DataPacketType packetType, byte[] data);
     }
 }

@@ -15,8 +15,8 @@ namespace Eloe.InterfaceSerializer
         private readonly ILogger _logger;
         private Dictionary<string, IInterfaceExecute> _implementedInterfaces = new Dictionary<string, IInterfaceExecute>();
         private Dictionary<string, IInterfaceExecute> _clientInterfaces = new Dictionary<string, IInterfaceExecute>();
-        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues =
-            new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>>();
+        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacket>> _waitingForReturnValues =
+            new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacket>>();
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
@@ -44,7 +44,7 @@ namespace Eloe.InterfaceSerializer
             }
         }
 
-        private void HandleFunctionCall(FunctionDataPacketInfo package, string clientId)
+        private void HandleFunctionCall(FunctionDataPacket package, string clientId)
         {
             var impl = _implementedInterfaces.FirstOrDefault(x => x.Key == package.ClassName);
             if (impl.Key == null)
@@ -59,9 +59,9 @@ namespace Eloe.InterfaceSerializer
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = clientId, Data = returnPackage });
         }
 
-        private void HandleFunctionReturnCall(FunctionReturnDataPacketInfo packet, string clientId)
+        private void HandleFunctionReturnCall(FunctionReturnDataPacket packet, string clientId)
         {
-            TaskCompletionSource<FunctionReturnDataPacketInfo> taskCompletionSource = null;
+            TaskCompletionSource<FunctionReturnDataPacket> taskCompletionSource = null;
 
             lock (_lockObj)
             {
@@ -112,7 +112,7 @@ namespace Eloe.InterfaceSerializer
             var id = _nextFunctionId++;
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = null, Data = package });
-            var t = new TaskCompletionSource<FunctionReturnDataPacketInfo>();
+            var t = new TaskCompletionSource<FunctionReturnDataPacket>();
 
             lock (_lockObj)
             {

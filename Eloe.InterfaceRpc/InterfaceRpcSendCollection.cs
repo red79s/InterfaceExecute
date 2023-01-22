@@ -14,8 +14,8 @@ namespace Eloe.InterfaceRpc
         private readonly IDataPacketFactory _dataPacketFactory;
         private readonly ILogger _logger;
         private List<IInterfaceExecute> _proxyInterfaces = new List<IInterfaceExecute>();
-        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>> _waitingForReturnValues =
-            new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacketInfo>>();
+        private Dictionary<int, TaskCompletionSource<FunctionReturnDataPacket>> _waitingForReturnValues =
+            new Dictionary<int, TaskCompletionSource<FunctionReturnDataPacket>>();
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
@@ -27,7 +27,7 @@ namespace Eloe.InterfaceRpc
             _logger = logger;
         }
 
-        public void MessageReceived(string clientId, DataPacketInfo dataPacket)
+        public void MessageReceived(string clientId, DataPacket dataPacket)
         {
             switch (dataPacket.PackageType)
             {
@@ -39,9 +39,9 @@ namespace Eloe.InterfaceRpc
             }
         }
 
-        private void HandleFunctionReturnCall(string clientId, FunctionReturnDataPacketInfo packet)
+        private void HandleFunctionReturnCall(string clientId, FunctionReturnDataPacket packet)
         {
-            TaskCompletionSource<FunctionReturnDataPacketInfo> taskCompletionSource = null;
+            TaskCompletionSource<FunctionReturnDataPacket> taskCompletionSource = null;
 
             lock (_lockObj)
             {
@@ -90,7 +90,7 @@ namespace Eloe.InterfaceRpc
         {
             var id = _nextFunctionId++;
 
-            var t = new TaskCompletionSource<FunctionReturnDataPacketInfo>();
+            var t = new TaskCompletionSource<FunctionReturnDataPacket>();
             lock (_lockObj)
             {
                 _waitingForReturnValues.Add(id, t);

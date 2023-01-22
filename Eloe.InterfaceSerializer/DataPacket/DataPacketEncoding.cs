@@ -28,7 +28,7 @@ namespace Eloe.InterfaceSerializer.DataPacket
             return buffer;
         }
 
-        public DataPacketInfo Decode(byte[] buffer)
+        public DataPacket Decode(byte[] buffer)
         {
             if (buffer == null || buffer.Length < FixedPackageLength)
                 throw new ArgumentNullException(nameof(buffer));
@@ -41,7 +41,7 @@ namespace Eloe.InterfaceSerializer.DataPacket
             var data = new byte[packageLength - FixedPackageLength];
             Array.Copy(buffer, 9, data, 0, packageLength - FixedPackageLength);
 
-            return new DataPacketInfo { PackageType = packageType, Data = data };
+            return new DataPacket { PackageType = packageType, Data = data };
         }
     }
 }

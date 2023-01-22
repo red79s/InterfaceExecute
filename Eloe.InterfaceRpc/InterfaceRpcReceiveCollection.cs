@@ -22,7 +22,7 @@ namespace Eloe.InterfaceRpc
             _logger = logger;
         }
 
-        public void MessageReceived(string clientId, DataPacketInfo dataPacket)
+        public void MessageReceived(string clientId, DataPacket dataPacket)
         {
             switch (dataPacket.PackageType)
             {
@@ -34,7 +34,7 @@ namespace Eloe.InterfaceRpc
             }
         }
 
-        private void HandleFunctionCall(string clientId, FunctionDataPacketInfo package)
+        private void HandleFunctionCall(string clientId, FunctionDataPacket package)
         {
             Task.Run(() =>
             {

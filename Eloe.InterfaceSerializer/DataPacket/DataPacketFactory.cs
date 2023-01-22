@@ -27,17 +27,17 @@
             return _dataPacketEncoding.Encode(DataPacketType.FunctionReturn, payload);
         }
 
-        public DataPacketInfo DecodeDataPacket(byte[] data)
+        public DataPacket DecodeDataPacket(byte[] data)
         {
             return _dataPacketEncoding.Decode(data);
         }
 
-        public FunctionDataPacketInfo DecodeFunctionCall(byte[] data)
+        public FunctionDataPacket DecodeFunctionCall(byte[] data)
         {
             return _functionDataPacketEncoding.Decode(data);
         }
 
-        public FunctionReturnDataPacketInfo DecodeFunctionReturnCall(byte[] data)
+        public FunctionReturnDataPacket DecodeFunctionReturnCall(byte[] data)
         {
             return _functionReturnDataPacketEncoding.Decode(data);
         }
