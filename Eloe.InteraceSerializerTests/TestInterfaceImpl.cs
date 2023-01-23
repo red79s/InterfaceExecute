@@ -35,7 +35,7 @@ namespace Eloe.InteraceSerializerTests
 
         public string GetItem(string itemKey, SomeReq req)
         {
-            throw new NotImplementedException();
+            return "abc";
         }
 
         public Task SendMessage(string message)
@@ -43,7 +43,7 @@ namespace Eloe.InteraceSerializerTests
             return Task.CompletedTask;
         }
 
-        public Task<bool> SendMessage(string message, int num)
+        public Task<bool> SendMessage2(string message, int num)
         {
             return Task<bool>.Run(() => true);
         }

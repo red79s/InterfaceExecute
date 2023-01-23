@@ -46,12 +46,18 @@ namespace Eloe.InterfaceSerializer
 
         public void Intercept(IInvocation invocation)
         {
-            var method = GetMetodInfo(invocation.Method.Name);
+            var parameterTypes = new List<Type>();
+            foreach (var parameter in invocation.Arguments)
+            {
+                parameterTypes.Add(parameter.GetType());
+            }
+            var method = GetMetodInfo(invocation.Method.Name, parameterTypes.ToArray());
+            
             var executionContext = new SerializedExecutionContext
             {
                 InterfaceFullName = InterfaceFullName,
                 MethodName = method.Name,
-                ExecutePath = method.Name,
+                UniqueMethodName = method.UniqueName,
                 Payload = _parameterSerializer.Serialize(method.Parameters, invocation.Arguments.ToList()),
                 HaveReturnValue = method.ReturnType != typeof(void),
                 ReturnType = method.ReturnType,
@@ -77,6 +83,27 @@ namespace Eloe.InterfaceSerializer
                     }
                 });
             }
+            else if (method.ReturnType != null && method.ReturnType.BaseType == typeof(Task) && method.ReturnType.GenericTypeArguments.Length > 0)
+            {
+                var taskCompletionType = typeof(TaskCompletionSource<>);
+                var taskCompletionGenericType = taskCompletionType.MakeGenericType(method.ReturnType.GenericTypeArguments[0]);
+                var taskCompleterInstance = Activator.CreateInstance(taskCompletionGenericType);
+
+                var taskProperty = taskCompletionGenericType.GetProperties().FirstOrDefault(x => x.Name == "Task");
+                var setResult = taskCompletionGenericType.GetMethod("SetResult");
+
+                invocation.ReturnValue = taskProperty.GetValue(taskCompleterInstance, null);
+                Task.Run(() =>
+                {
+                    OnExecute?.Invoke(this, executionContext);
+
+                    if (method.ReturnType != null)
+                    {
+                        var returnObj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType.GenericTypeArguments[0], executionContext.ReturnValue);
+                        setResult.Invoke(taskCompleterInstance, new object[] { returnObj });
+                    }
+                });
+            }
             else
             {
                 OnExecute?.Invoke(this, executionContext);
@@ -89,37 +116,52 @@ namespace Eloe.InterfaceSerializer
             }
         }
 
-        public bool HaveMethod(string method)
+        public MethodInf GetMetodInfo(string uniqueMethodName)
         {
-            return GetMetodInfo(method) != null;
+            return Methods.FirstOrDefault(x => x.UniqueName == uniqueMethodName);
         }
 
-        public MethodInf GetMetodInfo(string method)
+        public MethodInf GetMetodInfo(string methodName, Type[] parameterTypes)
         {
-            return Methods.FirstOrDefault(x => x.Name == method);
-        }
-
-        public List<MethodPathInfo> GetMethodPaths()
-        {
-            var methodPathInfo = new List<MethodPathInfo>();
-            foreach (var methodInf in Methods)
+            var methods = Methods.Where(x => x.Name == methodName).ToList();
+            if (methods.Count == 0)
             {
-                methodPathInfo.Add(new MethodPathInfo
-                {
-                    MethodPath = methodInf.Name,
-                    HaveReturnValue = methodInf.ReturnType != typeof(void),
-                    Executer = this
-                });
+                throw new Exception($"Invalid method name, interface does not contain: {methodName}");
+            }
+            if (methods.Count == 1)
+            {
+                return methods[0];
             }
 
-            return methodPathInfo;
+            foreach (var method in methods)
+            {
+                if (method.Parameters.Count == parameterTypes.Length)
+                {
+                    var isMatch = true;
+                    for (int i = 0; i < method.Parameters.Count; i++)
+                    {
+                        if (method.Parameters[i].Type != parameterTypes[i])
+                        {
+                            isMatch = false;
+                            break;
+                        }
+                    }
+
+                    if (isMatch)
+                    {
+                        return method;
+                    }
+                }
+            }
+
+            throw new Exception($"Invalid method name and parameters, there is no match for method: {methodName} with arguments: {string.Join(", ", parameterTypes.Select(x => x.Name))}");
         }
 
-        public string Execute(string method, string parametersStr)
+        public string Execute(string uniqueMethodName, string parametersStr)
         {
-            var methodInf = GetMetodInfo(method);
+            var methodInf = GetMetodInfo(uniqueMethodName);
             if (methodInf == null)
-                throw new ArgumentException($"Method: {method} does not exist", nameof(method));
+                throw new ArgumentException($"Method: {uniqueMethodName} does not exist", nameof(uniqueMethodName));
 
             var parameterObjs = _parameterSerializer.Deserialize(methodInf.Parameters, parametersStr);
             var returnValue = methodInf.MethodInfo.Invoke(_instance, parameterObjs.ToArray());
@@ -131,6 +173,7 @@ namespace Eloe.InterfaceSerializer
 
         private List<MethodInf> GetMethodAndTypeInfo(T instance = null)
         {
+            var methodNameOverloads = new Dictionary<string, int>();
             var methods = new List<MethodInf>();
 
             var type = typeof(T);
@@ -145,10 +188,15 @@ namespace Eloe.InterfaceSerializer
                     ReturnType = methodInfo.ReturnType
                 };
 
-                if (methodInfo.ReturnType != null && methodInfo.ReturnType.GenericTypeArguments.Length > 0)
+                if (methodNameOverloads.ContainsKey(method.Name))
                 {
-                    method.ReturnTypeGenericType = methodInfo.ReturnType.GenericTypeArguments[0];
+                    methodNameOverloads[method.Name]++;
                 }
+                else
+                {
+                    methodNameOverloads.Add(method.Name, 0);
+                }
+                method.UniqueName = $"{method.Name}:{methodNameOverloads[method.Name]}";
 
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {

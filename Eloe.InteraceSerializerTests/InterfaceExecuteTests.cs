@@ -29,7 +29,7 @@ namespace Eloe.InteraceSerializerTests
             i.SetItem("a");
 
             Assert.AreEqual("SetItem", ctx.MethodName);
-            Assert.AreEqual("SetItem", ctx.ExecutePath);
+            Assert.AreEqual("Eloe.InteraceSerializerTests.ITestInterface", ctx.InterfaceFullName);
             Assert.AreEqual("{\"item\":\"a\"}", ctx.Payload);
             Assert.IsFalse(ctx.HaveReturnValue);
         }
@@ -39,7 +39,7 @@ namespace Eloe.InteraceSerializerTests
         {
             var impl = new TestInterfaceImpl();
             var executer = new InterfaceExecute<ITestInterface>(impl);
-            executer.Execute("Init", "{}");
+            executer.Execute("Init:0", "{}");
             Assert.IsTrue(impl.InitCalled);
         }
 
@@ -51,11 +51,28 @@ namespace Eloe.InteraceSerializerTests
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                //context.ReturnValue = "{\"ReturnValue\": \"abc\"}";
+                context.ReturnValue = "{\"ReturnValue\": \"abc\"}";
             };
             var i = executer.GetInterface();
 
             var res = i.GetItem("a");
+            Assert.AreEqual("abc", res);
+        }
+
+        [TestMethod]
+        public void TestSerializeGetItemOverload()
+        {
+            SerializedExecutionContext ctx = null;
+            var executer = new InterfaceExecute<ITestInterface>();
+            executer.OnExecute += (sender, context) =>
+            {
+                ctx = context;
+                context.ReturnValue = "{\"ReturnValue\": \"abc\"}";
+            };
+            var i = executer.GetInterface();
+
+            var res = i.GetItem("key1", new SomeReq { Id = 2, Name = "name"});
+            Assert.AreEqual("abc", res);
         }
 
         [TestMethod]
@@ -64,7 +81,7 @@ namespace Eloe.InteraceSerializerTests
             var impl = new TestInterfaceImpl();
             impl.SetItem("a");
             var executer = new InterfaceExecute<ITestInterface>(impl);
-            var res = executer.Execute("GetItem", "{\"itemKey\": \"a\"}");
+            var res = executer.Execute("GetItem:0", "{\"itemKey\": \"a\"}");
         }
 
         [TestMethod]
@@ -91,14 +108,20 @@ namespace Eloe.InteraceSerializerTests
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                context.ReturnValue = "";
+                context.ReturnValue = "{\"ReturnValue\": true}";
             };
             var i = executer.GetInterface();
 
-            var res = i.SendMessage("a", 1);
+            var res = i.SendMessage2("a", 1);
             res.Wait();
             var a = res.Result;
             Assert.AreEqual(true, a);
+        }
+
+        [TestMethod]
+        public void TestOverloadedFunctionA()
+        {
+
         }
     }
 }

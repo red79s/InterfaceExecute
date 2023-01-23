@@ -96,7 +96,7 @@ namespace Eloe.InterfaceRpc
                 _waitingForReturnValues.Add(id, t);
             }
 
-            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
+            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.Payload);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
 
             var notTimeout = t.Task.Wait(_functionReturnWaitTime);
