@@ -1,6 +1,7 @@
 ﻿using ClientServerComDef;
 using Eloe.InterfaceSerializer;
 using System;
+using System.Diagnostics;
 
 namespace WebSocketClient
 {
@@ -24,6 +25,21 @@ namespace WebSocketClient
                 {
                     var res = serverFunctions.Ping(pingNum++);
                     Console.WriteLine($"Ping result: {res}");
+
+                    int processingTimeInSec = 0;
+                    if (int.TryParse(m, out processingTimeInSec))
+                    {
+                        Console.WriteLine("Calling Process");
+                        var sw = new Stopwatch();
+                        sw.Start();
+                        var processRes = serverFunctions.Process(processingTimeInSec);
+                        sw.Stop();
+                        Console.WriteLine($"Async Process returned in : {sw.ElapsedMilliseconds}ms");
+                        sw.Start();
+                        processRes.Wait();
+                        sw.Stop();
+                        Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
+                    }
                 }
                 catch (Exception ex)
                 {

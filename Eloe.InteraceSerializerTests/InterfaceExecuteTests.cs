@@ -112,16 +112,26 @@ namespace Eloe.InteraceSerializerTests
             };
             var i = executer.GetInterface();
 
-            var res = i.SendMessage2("a", 1);
+            var res = i.SendMessage("a", 1);
             res.Wait();
             var a = res.Result;
             Assert.AreEqual(true, a);
         }
 
         [TestMethod]
-        public void TestOverloadedFunctionA()
+        public void TestDeserializeTaskOfBoolReturnValue()
         {
+            var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
+            var res = executer.Execute("SendMessage:1", "{\"message\":\"hello\", \"num\": 23}");
+            Assert.AreEqual("{\"ReturnValue\": \"True\"}", res);
+        }
 
+        [TestMethod]
+        public void TestDeserializeTaskReturnValue()
+        {
+            var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
+            var res = executer.Execute("SendMessage:0", "{\"message\":\"hello\"}");
+            Assert.IsNull(res);
         }
     }
 }

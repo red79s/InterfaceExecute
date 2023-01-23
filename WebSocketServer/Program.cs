@@ -1,6 +1,7 @@
 ﻿
 using ClientServerComDef;
 using Eloe.InterfaceSerializer;
+using System.Diagnostics;
 using WebSocketServer;
 
 internal class Program
@@ -35,6 +36,15 @@ internal class Program
             //if (id % 4 == 0)
             //    throw new Exception("Invalid number");
             return id + 1;
+        }
+
+        public async Task<LongProcessingTimeResp> Process(int secondsToSleep)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            await Task.Delay(secondsToSleep * 1000);
+            sw.Stop();
+            return new LongProcessingTimeResp { ProcessingTimeInMs = sw.ElapsedMilliseconds };
         }
 
         public void WriteMessage(string message)

@@ -168,6 +168,18 @@ namespace Eloe.InterfaceSerializer
             if (methodInf.ReturnType == null || returnValue == null)
                 return null;
 
+            if (methodInf.ReturnType == typeof(Task))
+            {
+                var waitMethod = methodInf.ReturnType.GetMethod("Wait", new Type[0]);
+                waitMethod.Invoke(returnValue, new object[0]);
+                return null;
+            }
+            else if (methodInf.ReturnType != null && methodInf.ReturnType.BaseType == typeof(Task) && methodInf.ReturnType.GenericTypeArguments.Length > 0)
+            {
+                var resultProperty = methodInf.ReturnType.GetProperty("Result");
+                var returnValueObj = resultProperty.GetValue(returnValue, null);
+                return _parameterSerializer.Serialize("ReturnValue", methodInf.ReturnType.GenericTypeArguments[0], returnValueObj);
+            }
             return _parameterSerializer.Serialize("ReturnValue", methodInf.ReturnType, returnValue);
         }
 

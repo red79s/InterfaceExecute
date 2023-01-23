@@ -11,7 +11,7 @@ namespace Eloe.InteraceSerializerTests
         string GetItem(string itemKey);
         string GetItem(string itemKey, SomeReq req);
         Task SendMessage(string message);
-        Task<bool> SendMessage2(string message, int num);
+        Task<bool> SendMessage(string message, int num);
     }
 
     public class SomeReq
