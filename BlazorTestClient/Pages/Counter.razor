@@ -1,26 +1,40 @@
 ﻿@page "/counter"
+@using System.Net.WebSockets;
+@using System.Text;
+@using ClientServerComDef;
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>
+<p>Returned counter: @returnedCounter</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 <button class="btn btn-primary" @onclick="ConnectToServer">Connect to server</button>
 
 @code {
     private int currentCount = 0;
-
+    private int returnedCounter = 0;
+    private MyLogger _logger = new MyLogger();
+    private WsClient? _client;
+    private IServerFunctions? _serverFunctions;
     private void IncrementCount()
     {
         currentCount++;
     }
 
-    private void ConnectToServer()
+    private async void ConnectToServer()
     {
-        var logger = new MyLogger();
-        var client = new WsClient(logger);
-        client.Connect("localhost", 9000);
+        if (_client == null)
+        {
+            _client = new WsClient(_logger);
+            await _client.Connect("localhost", 9000);
+            _serverFunctions = _client.AddServerInterface<IServerFunctions>();
+        }
+
+        var pres = _serverFunctions.Process(currentCount).Result;
+        returnedCounter = (int)pres.ProcessingTimeInMs;
+
     }
 }

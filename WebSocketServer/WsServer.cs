@@ -18,11 +18,11 @@ namespace WebSocketServer
             return new List<ClientInfo>();
         }
 
-        public event EventHandler<ClientInfo> OnClientConnected;
-        public event EventHandler<ClientInfo> OnClientDisconnected;
+        public event EventHandler<ClientInfo>? OnClientConnected;
+        public event EventHandler<ClientInfo>? OnClientDisconnected;
 
         public WsServer(string hostname, int port, ILogger logger)
-            : base(logger, true)
+            : base(logger, false)
         {
             _logger = logger;
 
