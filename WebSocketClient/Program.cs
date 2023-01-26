@@ -2,6 +2,7 @@
 using Eloe.InterfaceSerializer;
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace WebSocketClient
 {
@@ -20,33 +21,32 @@ namespace WebSocketClient
             int pingNum = 1;
             while (true)
             {
-                var m = Console.ReadLine();
                 try
                 {
                     var res = serverFunctions.Ping(pingNum++);
                     Console.WriteLine($"Ping result: {res}");
 
                     int processingTimeInSec = 0;
-                    if (int.TryParse(m, out processingTimeInSec))
-                    {
-                        Console.WriteLine("Calling Process");
-                        var sw = new Stopwatch();
-                        sw.Start();
-                        var processRes = serverFunctions.Process(processingTimeInSec);
-                        sw.Stop();
-                        Console.WriteLine($"Async Process returned in : {sw.ElapsedMilliseconds}ms");
-                        sw.Start();
-                        processRes.Wait();
-                        sw.Stop();
-                        Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
-                    }
+                    
+                    Console.WriteLine("Calling Process");
+                    var sw = new Stopwatch();
+                    sw.Start();
+                    var processRes = serverFunctions.Process(processingTimeInSec);
+                    sw.Stop();
+                    Console.WriteLine($"Async Process returned in : {sw.ElapsedMilliseconds}ms");
+                    sw.Start();
+                    processRes.Wait();
+                    sw.Stop();
+                    Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
+
+                    serverFunctions.WriteMessage($"message: {pingNum}");
+
+                    Thread.Sleep(1000);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
-               
-                serverFunctions.WriteMessage(m);
             }
         }
     }
