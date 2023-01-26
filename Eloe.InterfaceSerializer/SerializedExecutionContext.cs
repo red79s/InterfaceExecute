@@ -12,5 +12,6 @@ namespace Eloe.InterfaceSerializer
         public bool HaveReturnValue { get; set; }
         public Type ReturnType { get; set; }
         public string ClientId { get; set; }
+        public Exception Exception { get; set; }
     }
 }

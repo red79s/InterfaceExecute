@@ -40,13 +40,14 @@ namespace WebSocketClient
                     Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
 
                     serverFunctions.WriteMessage($"message: {pingNum}");
-
-                    Thread.Sleep(1000);
+                    
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
+
+                Thread.Sleep(1000);
             }
         }
     }

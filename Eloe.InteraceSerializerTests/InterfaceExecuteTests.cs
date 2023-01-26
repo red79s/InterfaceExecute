@@ -82,6 +82,7 @@ namespace Eloe.InteraceSerializerTests
             impl.SetItem("a");
             var executer = new InterfaceExecute<ITestInterface>(impl);
             var res = executer.Execute("GetItem:0", "{\"itemKey\": \"a\"}");
+            Assert.AreEqual("{\"ReturnValue\": \"a\"}", res);
         }
 
         [TestMethod]

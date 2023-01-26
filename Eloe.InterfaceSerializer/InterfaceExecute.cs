@@ -72,7 +72,11 @@ namespace Eloe.InterfaceSerializer
                 {
                     OnExecute?.Invoke(this, executionContext);
 
-                    if (method.ReturnType != null)
+                    if (executionContext.Exception != null)
+                    {
+                        taskCompleter.SetException(executionContext.Exception);
+                    }
+                    else if (method.ReturnType != null)
                     {
                         var obj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType, executionContext.ReturnValue);
                         taskCompleter.SetResult(obj);
@@ -91,13 +95,18 @@ namespace Eloe.InterfaceSerializer
 
                 var taskProperty = taskCompletionGenericType.GetProperties().FirstOrDefault(x => x.Name == "Task");
                 var setResult = taskCompletionGenericType.GetMethod("SetResult");
+                var setException = taskCompletionGenericType.GetMethod("SetException", new Type[] { typeof(Exception)});
 
                 invocation.ReturnValue = taskProperty.GetValue(taskCompleterInstance, null);
                 Task.Run(() =>
                 {
                     OnExecute?.Invoke(this, executionContext);
 
-                    if (method.ReturnType != null)
+                    if (executionContext.Exception != null)
+                    {
+                        setException.Invoke(taskCompleterInstance, new object[] { executionContext.Exception });
+                    }
+                    else if (method.ReturnType != null)
                     {
                         var returnObj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType.GenericTypeArguments[0], executionContext.ReturnValue);
                         setResult.Invoke(taskCompleterInstance, new object[] { returnObj });
@@ -107,6 +116,11 @@ namespace Eloe.InterfaceSerializer
             else
             {
                 OnExecute?.Invoke(this, executionContext);
+
+                if (executionContext.Exception != null)
+                {
+                    throw new Exception($"Unhandled exception in {executionContext.InterfaceFullName}", executionContext.Exception);
+                }
 
                 if (method.ReturnType != null)
                 {

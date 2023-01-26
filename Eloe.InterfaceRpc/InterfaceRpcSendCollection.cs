@@ -88,10 +88,17 @@ namespace Eloe.InterfaceRpc
 
         public void AbortAllExecution()
         {
-            _cancellationTokenSource.Cancel();
+            lock (_cacellationLockObj)
+            {
+                foreach (var cancellationToken in _cancellationTokenSources)
+                {
+                    cancellationToken.Cancel();
+                }
+            }
         }
 
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private object _cacellationLockObj = new object();
+        private List<CancellationTokenSource> _cancellationTokenSources = new List<CancellationTokenSource>();
         private volatile int _nextFunctionId = 1;
         private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
@@ -105,18 +112,43 @@ namespace Eloe.InterfaceRpc
 
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.Payload);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
-
-            var notTimeout = t.Task.Wait(_functionReturnWaitTime, _cancellationTokenSource.Token);
-            if (!notTimeout)
+            
+            //allow all functions waiting for return value to be canceled in case of a disconnect.
+            var cancellationToken = new CancellationTokenSource();
+            lock (_cacellationLockObj)
             {
-                throw new Exception("timeout while waiting for function return");
+                _cancellationTokenSources.Add(cancellationToken);
+            }
+
+            try
+            {
+                var timeoutElapsed = !t.Task.Wait(_functionReturnWaitTime, cancellationToken.Token);
+                lock (_cacellationLockObj)
+                {
+                    _cancellationTokenSources.Remove(cancellationToken);
+                }
+                if (timeoutElapsed)
+                {
+                    context.Exception = new Exception("timeout while waiting for function return");
+                    return;
+                }
+            }
+            catch(Exception ex)
+            {
+                lock (_cacellationLockObj)
+                {
+                    _cancellationTokenSources.Remove(cancellationToken);
+                }
+                context.Exception = new Exception($"Function call was canceled, ex: {ex.Message}");
+                return;
             }
 
             if (!string.IsNullOrEmpty(t.Task.Result.Exception))
             {
-                throw new Exception(t.Task.Result.Exception);
+                context.Exception = new Exception(t.Task.Result.Exception);
+                return;
             }
-
+            
             context.ReturnValue = t.Task.Result.ReturnValue;
         }
     }
