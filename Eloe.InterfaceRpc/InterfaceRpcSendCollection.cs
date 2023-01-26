@@ -3,6 +3,7 @@ using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
@@ -85,6 +86,12 @@ namespace Eloe.InterfaceRpc
             }
         }
 
+        public void AbortAllExecution()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private volatile int _nextFunctionId = 1;
         private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
@@ -99,7 +106,7 @@ namespace Eloe.InterfaceRpc
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.Payload);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
 
-            var notTimeout = t.Task.Wait(_functionReturnWaitTime);
+            var notTimeout = t.Task.Wait(_functionReturnWaitTime, _cancellationTokenSource.Token);
             if (!notTimeout)
             {
                 throw new Exception("timeout while waiting for function return");

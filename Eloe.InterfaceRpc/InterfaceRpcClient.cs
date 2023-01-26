@@ -35,6 +35,11 @@ namespace Eloe.InterfaceRpc
             _comunicationChannel.OnMessageReceived += _comunicationChannel_OnMessageReceived;
         }
 
+        public void OnDisconnect()
+        {
+            _sendCollection.AbortAllExecution();
+        }
+
         private void _comunicationChannel_OnMessageReceived(object sender, MessageReceivedClientArgs e)
         {
             var packet = _dataPacketFactory.DecodeDataPacket(e.Data);

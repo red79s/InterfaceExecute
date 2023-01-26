@@ -28,6 +28,11 @@ namespace Eloe.InterfaceRpc
             _logComunication = logComunication;
         }
 
+        public void OnDisconnect()
+        {
+            _sendCollection.AbortAllExecution();
+        }
+
         protected void OnMessageReceived(MessageReceivedClientArgs e)
         {
             var packet = _dataPacketFactory.DecodeDataPacket(e.Data);
