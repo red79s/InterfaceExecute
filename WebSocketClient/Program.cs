@@ -23,23 +23,27 @@ namespace WebSocketClient
             {
                 try
                 {
-                    var res = serverFunctions.Ping(pingNum++);
-                    Console.WriteLine($"Ping result: {res}");
+                    if (true)//client.IsConnected)
+                    {
+                        var res = serverFunctions.Ping(pingNum++);
+                        Console.WriteLine($"Ping result: {res}");
 
-                    int processingTimeInSec = 0;
+                        int processingTimeInSec = 0;
+
+                        Console.WriteLine("Calling Process");
+                        var sw = new Stopwatch();
+                        sw.Start();
+                        var processRes = serverFunctions.Process(processingTimeInSec);
+                        sw.Stop();
+                        Console.WriteLine($"Async Process returned in : {sw.ElapsedMilliseconds}ms");
+                        sw.Start();
+                        processRes.Wait();
+                        sw.Stop();
+                        Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
+
+                        serverFunctions.WriteMessage($"message: {pingNum}");
+                    }
                     
-                    Console.WriteLine("Calling Process");
-                    var sw = new Stopwatch();
-                    sw.Start();
-                    var processRes = serverFunctions.Process(processingTimeInSec);
-                    sw.Stop();
-                    Console.WriteLine($"Async Process returned in : {sw.ElapsedMilliseconds}ms");
-                    sw.Start();
-                    processRes.Wait();
-                    sw.Stop();
-                    Console.WriteLine($"Async Process finished in : {sw.ElapsedMilliseconds}ms, res: {processRes.Result.ProcessingTimeInMs}ms");
-
-                    serverFunctions.WriteMessage($"message: {pingNum}");
                     
                 }
                 catch (Exception ex)

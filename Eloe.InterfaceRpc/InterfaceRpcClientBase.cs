@@ -30,7 +30,12 @@ namespace Eloe.InterfaceRpc
 
         public void OnDisconnect()
         {
-            _sendCollection.AbortAllExecution();
+            _sendCollection.OnDisconnected();
+        }
+
+        public void OnConnected()
+        {
+            _sendCollection.OnConnected();
         }
 
         protected void OnMessageReceived(MessageReceivedClientArgs e)

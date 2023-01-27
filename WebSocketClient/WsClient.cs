@@ -12,8 +12,20 @@ namespace WebSocketClient
     {
         private WatsonWsClient _client;
         public WsClient(ILogger logger)
-            : base(logger, true)
+            : base(logger, false)
         {
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    return false;
+                }
+                return _client.Connected;
+            }
         }
 
         public void Connect(string hostname, int port)
@@ -25,6 +37,11 @@ namespace WebSocketClient
         {
             try
             {
+                if (delayInMs > 0)
+                {
+                    Console.WriteLine($"Trying to reconnect: {delayInMs}");
+                }
+
                 if (_client != null)
                 {
                     _client.Dispose();
@@ -32,7 +49,12 @@ namespace WebSocketClient
                 }
 
                 _client = new WatsonWsClient(hostname, port, false);
-                _client.ServerConnected += (s, e) => Console.WriteLine("Connected to server");
+                _client.ServerConnected += (s, e) =>
+                {
+                    OnConnected();
+                    Console.WriteLine("Connected to server");
+                };
+
                 _client.ServerDisconnected += (s, e) =>
                 {
                     Console.WriteLine("Disconnected from server");
@@ -43,7 +65,11 @@ namespace WebSocketClient
                 _client.MessageReceived += _client_MessageReceived;
 
                 Thread.Sleep(delayInMs);
-                _client.Start();
+                if (!_client.StartWithTimeout(10))
+                {
+                    Console.WriteLine($"Failed to connect");
+                    Connect(hostname, port, IncrementDelay(delayInMs));
+                }
             }
             catch (Exception ex)
             {

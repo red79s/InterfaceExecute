@@ -86,6 +86,17 @@ namespace Eloe.InterfaceRpc
             }
         }
 
+        public void OnConnected()
+        {
+            _connected = true;
+        }
+
+        public void OnDisconnected()
+        {
+            _connected = false;
+            AbortAllExecution();
+        }
+
         public void AbortAllExecution()
         {
             lock (_cacellationLockObj)
@@ -97,11 +108,18 @@ namespace Eloe.InterfaceRpc
             }
         }
 
+        private volatile bool _connected;
         private object _cacellationLockObj = new object();
         private List<CancellationTokenSource> _cancellationTokenSources = new List<CancellationTokenSource>();
         private volatile int _nextFunctionId = 1;
         private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
+            if (!_connected)
+            {
+                context.Exception = new Exception("not connected");
+                return;
+            }
+
             var id = _nextFunctionId++;
 
             var t = new TaskCompletionSource<FunctionReturnDataPacket>();
