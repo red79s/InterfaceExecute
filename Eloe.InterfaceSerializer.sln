@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eloe.InteraceSerializerTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientServerComDef", "ClientServerComDef\ClientServerComDef.csproj", "{D654BBE4-AB49-439C-96E7-175A3DE6C674}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorTestClient", "BlazorTestClient\BlazorTestClient.csproj", "{F06CFDBE-860F-47A8-B696-6F47BD1ED7B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorTestClient", "BlazorTestClient\BlazorTestClient.csproj", "{F06CFDBE-860F-47A8-B696-6F47BD1ED7B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiServer", "WebApiServer\WebApiServer.csproj", "{19103224-0994-49E7-B1D9-7F29CB50DC54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{F06CFDBE-860F-47A8-B696-6F47BD1ED7B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F06CFDBE-860F-47A8-B696-6F47BD1ED7B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F06CFDBE-860F-47A8-B696-6F47BD1ED7B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19103224-0994-49E7-B1D9-7F29CB50DC54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19103224-0994-49E7-B1D9-7F29CB50DC54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19103224-0994-49E7-B1D9-7F29CB50DC54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19103224-0994-49E7-B1D9-7F29CB50DC54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,65 +3,51 @@ using Eloe.InterfaceSerializer.DataPacket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
 {
-    public class InterfaceRpcReceiveCollection
+    public class InterfaceRpcReceiveCollection : IInterfaceRpcReceiveCollection
     {
-        public EventHandler<SendDataInfo> OnSendData;
-        private readonly IDataPacketFactory _dataPacketFactory;
         private readonly ILogger _logger;
         private Dictionary<string, IInterfaceExecute> _implementedInterfaces = new Dictionary<string, IInterfaceExecute>();
 
         public InterfaceRpcReceiveCollection(
-            IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {
-            _dataPacketFactory = dataPacketFactory;
             _logger = logger;
         }
 
-        public void MessageReceived(string clientId, DataPacket dataPacket)
+        public FunctionReturnDataPacket HandleFunctionCall(FunctionDataPacket package)
         {
-            switch (dataPacket.PackageType)
+            var impl = _implementedInterfaces.FirstOrDefault(x => x.Key == package.ClassName);
+            if (impl.Key == null)
             {
-                case DataPacketType.FunctionCall:
-                    HandleFunctionCall(clientId, _dataPacketFactory.DecodeFunctionCall(dataPacket.Data));
-                    break;
-                default:
-                    throw new Exception("Invalid DataPackageType: " + dataPacket.PackageType);
+                _logger.Warn($"Received call for class: {package.ClassName} that have no registered implementations");
+                return new FunctionReturnDataPacket
+                {
+                    Id = package.Id,
+                    Exception = $"Received call for class: {package.ClassName} that have no registered implementations"
+                };
             }
-        }
 
-        private void HandleFunctionCall(string clientId, FunctionDataPacket package)
-        {
-            Task.Run(() =>
+            try
             {
-                byte[] returnPackage = null;
-                var impl = _implementedInterfaces.FirstOrDefault(x => x.Key == package.ClassName);
-                if (impl.Key == null)
+                var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters);
+
+                return new FunctionReturnDataPacket
                 {
-                    _logger.Warn($"Received call for class: {package.ClassName} that have no registered implementations");
-                    returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, "", $"Received call for class: {package.ClassName} that have no registered implementations");
-                }
-
-                if (returnPackage == null)
+                    Id = package.Id,
+                    ReturnValue = res
+                };
+            }
+            catch (Exception ex)
+            {
+                return new FunctionReturnDataPacket
                 {
-                    try
-                    {
-                        var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters);
-
-                        returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, res, null);
-                    }
-                    catch (Exception ex)
-                    {
-                        returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, "", ex.ToString());
-                    }
-                }
-
-                OnSendData?.Invoke(this, new SendDataInfo { ClientId = clientId, Data = returnPackage });
-            });
+                    Id = package.Id,
+                    Exception = ex.ToString()
+                };
+            }
         }
 
         public void ImplementInterface<U>(U instance) where U : class
