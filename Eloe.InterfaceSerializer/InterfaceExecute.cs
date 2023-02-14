@@ -203,6 +203,8 @@ namespace Eloe.InterfaceSerializer
             var methods = new List<MethodInf>();
 
             var type = typeof(T);
+            if (instance != null)
+                type = instance.GetType();
 
             foreach (var methodInfo in type.GetMethods())
             {

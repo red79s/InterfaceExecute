@@ -134,5 +134,12 @@ namespace Eloe.InteraceSerializerTests
             var res = executer.Execute("SendMessage:0", "{\"message\":\"hello\"}");
             Assert.IsNull(res);
         }
+
+        [TestMethod]
+        public void TestAuthorize()
+        {
+            var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
+            var res = executer.Execute("WithAuth:0", "{\"num\":10}");
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
 {
-    public class InterfaceRpcSendCollection
+    public class InterfaceRpcSendCollectionSendReceive
     {
         public EventHandler<SendDataInfo> OnSendData;
 
@@ -20,7 +20,7 @@ namespace Eloe.InterfaceRpc
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
-        public InterfaceRpcSendCollection(
+        public InterfaceRpcSendCollectionSendReceive(
             IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {

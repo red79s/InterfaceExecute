@@ -1,4 +1,5 @@
 ﻿using ClientServerComDef;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiServer
 {
@@ -14,9 +15,10 @@ namespace WebApiServer
             return Task.FromResult<LongProcessingTimeResp>(new LongProcessingTimeResp { ProcessingTimeInMs = 10 });
         }
 
+        [Authorize]
         public void WriteMessage(string message)
         {
-            
+            Console.WriteLine($"Received message: {message}");
         }
     }
 }

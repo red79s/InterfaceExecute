@@ -24,7 +24,7 @@ namespace Eloe.InteraceSerializerTests
             var functionDataPacketEncoder = new FunctionDataPacketEncoding();
             var functionReturnDataPacketEncoder = new FunctionReturnDataPacketEncoding();
             var dataPacketFactory = new DataPacketFactory(dataPacketEncoder, functionDataPacketEncoder, functionReturnDataPacketEncoder);
-            var col = new InterfaceRpcSendCollection(dataPacketFactory, _logger.Object);
+            var col = new InterfaceRpcSendCollectionSendReceive(dataPacketFactory, _logger.Object);
             var interf = col.AddProxyCallbackInterface<ITestInterface>();
             try
             {

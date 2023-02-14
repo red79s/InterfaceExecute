@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +32,12 @@ namespace Eloe.InteraceSerializerTests
             if (Items.Contains(itemKey))
                 return itemKey;
             return null;
+        }
+
+        [Authorize]
+        public string WithAuth(int num)
+        {
+            return $"{num}";
         }
 
         public string GetItem(string itemKey, SomeReq req)
