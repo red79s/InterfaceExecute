@@ -1,5 +1,8 @@
 using Eloe.InterfaceSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Eloe.InteraceSerializerTests
 {
@@ -138,8 +141,53 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestAuthorize()
         {
+            var authHandler = new AuthHandlerTest("abc", new List<string> { "Admin", "User" });
             var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
-            var res = executer.Execute("WithAuth:0", "{\"num\":10}");
+            var res = executer.Execute("WithAuth:0", "{\"num\":10}", "abc", authHandler);
+            Assert.IsNotNull(res);
+        }
+
+        [ExpectedException(typeof(Exception))]
+        [TestMethod]
+        public void TestAuthorizeFail()
+        {
+            var authHandler = new AuthHandlerTest("abc", new List<string> { "Admin", "User" });
+            var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
+            var res = executer.Execute("WithAuth:0", "{\"num\":10}", "abcd", authHandler);
+            Assert.IsNotNull(res);
+        }
+
+        public class AuthHandlerTest : IAuthorizeHandler
+        {
+            private readonly string _validJwtToken;
+            private readonly List<string> _allowedRoles;
+
+            public AuthHandlerTest(string validJwtToken, List<string> allowedRoles)
+            {
+                _validJwtToken = validJwtToken;
+                _allowedRoles = allowedRoles;
+            }
+
+            public void Authorize(string jwtToken)
+            {
+                if (jwtToken != _validJwtToken)
+                {
+                    throw new Exception("Not authorized");
+                }
+            }
+
+            public void Authorize(string jwtToken, List<string> roles)
+            {
+                Authorize(jwtToken);
+
+                foreach (var role in roles) 
+                {
+                    if (_allowedRoles == null || _allowedRoles.FirstOrDefault(x => x == role) == null)
+                    {
+                        throw new Exception($"Not authorized, not access to role: {role}");
+                    }
+                }
+            }
         }
     }
 }

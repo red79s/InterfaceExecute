@@ -34,7 +34,7 @@ namespace Eloe.InteraceSerializerTests
             return null;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin, User")]
         public string WithAuth(int num)
         {
             return $"{num}";

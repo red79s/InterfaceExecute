@@ -17,7 +17,7 @@ namespace Eloe.InterfaceRpc
             _logger = logger;
         }
 
-        public FunctionReturnDataPacket HandleFunctionCall(FunctionDataPacket package)
+        public FunctionReturnDataPacket HandleFunctionCall(FunctionDataPacket package, IAuthorizeHandler authorizeHandler)
         {
             var impl = _implementedInterfaces.FirstOrDefault(x => x.Key == package.ClassName);
             if (impl.Key == null)
@@ -32,7 +32,7 @@ namespace Eloe.InterfaceRpc
 
             try
             {
-                var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters);
+                var res = impl.Value.Execute(package.FunctionName, package.FunctionParameters, package.JwtToken, authorizeHandler);
 
                 return new FunctionReturnDataPacket
                 {

@@ -119,7 +119,7 @@ namespace Eloe.InterfaceSerializer
 
                 if (executionContext.Exception != null)
                 {
-                    throw new Exception($"Unhandled exception in {executionContext.InterfaceFullName}", executionContext.Exception);
+                    throw new Exception($"Unhandled exception in {executionContext.InterfaceFullName}.{executionContext.MethodName}", executionContext.Exception);
                 }
 
                 if (method.ReturnType != null)
@@ -171,11 +171,21 @@ namespace Eloe.InterfaceSerializer
             throw new Exception($"Invalid method name and parameters, there is no match for method: {methodName} with arguments: {string.Join(", ", parameterTypes.Select(x => x.Name))}");
         }
 
-        public string Execute(string uniqueMethodName, string parametersStr)
+        public string Execute(string uniqueMethodName, string parametersStr, string jwtToken = null, IAuthorizeHandler authorizeHandler = null)
         {
             var methodInf = GetMetodInfo(uniqueMethodName);
             if (methodInf == null)
                 throw new ArgumentException($"Method: {uniqueMethodName} does not exist", nameof(uniqueMethodName));
+
+            if (methodInf.Authorize.RequireAuthorization)
+            {
+                if (authorizeHandler == null)
+                {
+                    throw new Exception("Method requires authorization, but not AuthorizationHandler is provided");
+                }
+
+                authorizeHandler.Authorize(jwtToken, methodInf.Authorize.Roles);
+            }
 
             var parameterObjs = _parameterSerializer.Deserialize(methodInf.Parameters, parametersStr);
             var returnValue = methodInf.MethodInfo.Invoke(_instance, parameterObjs.ToArray());
@@ -234,6 +244,9 @@ namespace Eloe.InterfaceSerializer
                         Type = parameterInfo.ParameterType
                     });
                 }
+
+                var authAttribute = methodInfo.CustomAttributes.FirstOrDefault(x => x.AttributeType.Name == "AuthorizeAttribute");
+                method.Authorize = new AuthorizeInf(authAttribute);
 
                 methods.Add(method);
             }

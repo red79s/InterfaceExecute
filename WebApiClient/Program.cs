@@ -45,14 +45,29 @@ internal class Program
             var client = new InterfaceRpcSendCollectionHttpClient("https://localhost:7010", tokenResp.access_token);
             var serverInterface = client.AddProxyCallbackInterface<IServerFunctions>();
 
+            var client2 = new InterfaceRpcSendCollectionHttpClient("https://localhost:7010", "");
+            var serverInterface2 = client2.AddProxyCallbackInterface<IServerFunctions>();
+
+            var client3 = new InterfaceRpcSendCollectionHttpClient("https://localhost:7010", "");
+            var serverInterface3 = client3.AddProxyCallbackInterface<IServerFunctions>();
+
             int pingVal = 1;
             while (true)
             {
                 var line = Console.ReadLine();
                 serverInterface.WriteMessage(line);
-                var res = serverInterface.Ping(pingVal);
+                var res = serverInterface2.Ping(pingVal);
                 Console.WriteLine($"ping response: {res}");
                 pingVal++;
+
+                try
+                {
+                    serverInterface3.WriteMessage("line");
+                }
+                catch ( Exception ex )
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
         catch (Exception ex)

@@ -1,11 +1,11 @@
-﻿
-
-using Eloe.InterfaceRpc;
-using Eloe.InterfaceSerializer.DataPacket;
-using Microsoft.AspNetCore.Authorization;
+﻿using Eloe.InterfaceSerializer.DataPacket;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using System.Net;
+using System.IdentityModel.Tokens.Jwt;
+using WebApiServer.Auth;
 
 namespace WebApiServer.Controllers
 {
@@ -20,10 +20,13 @@ namespace WebApiServer.Controllers
 
         //[Authorize]
         [HttpPost("~/InterfaceExecute/Execute")]
-        public string Execute()
+        public async Task<string> Execute()
         {
             try
             {
+                var authHandler = new JwtAuthorizeHandler("https://auth.apx-systems.com/", new List<string> { "APX" });
+                await authHandler.GetAuthServerConfiguration();
+
                 string executeArguments = "";
                 using (StreamReader stream = new StreamReader(Request.Body))
                 {
@@ -35,8 +38,18 @@ namespace WebApiServer.Controllers
                 {
                     throw new Exception("Invalid arguments");
                 }
+
+                var authHeader = Request.Headers.Authorization.ToString();
+                if (authHeader != null)
+                {
+                    if (authHeader.StartsWith("bearer ", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        funcData.JwtToken = authHeader.Substring(7);
+                    }
+                }
+
                 var rpcCollection = _interfaceRpcReceive.Get();
-                var resultData = rpcCollection.HandleFunctionCall(funcData);
+                var resultData = rpcCollection.HandleFunctionCall(funcData, authHandler);
                 var resultString = JsonConvert.SerializeObject(resultData);
                 return resultString;
             }

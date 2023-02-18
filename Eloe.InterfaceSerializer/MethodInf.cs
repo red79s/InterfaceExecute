@@ -11,5 +11,6 @@ namespace Eloe.InterfaceSerializer
         public List<ParameterInf> Parameters { get; set; }
         public Type ReturnType { get; set; }
         public MethodInfo MethodInfo { get; set; }
+        public AuthorizeInf Authorize { get; set; }
     }
 }
