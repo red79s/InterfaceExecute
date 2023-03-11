@@ -110,7 +110,7 @@ namespace Eloe.InterfaceSerializer
         private void HandleClientCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
             var id = _nextFunctionId++;
-            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.Payload);
+            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.MethodName, context.MethodParameters);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = null, Data = package });
             var t = new TaskCompletionSource<FunctionReturnDataPacket>();
 
@@ -125,9 +125,9 @@ namespace Eloe.InterfaceSerializer
                 throw new Exception("timeout while waiting for function return");
             }
 
-            if (!string.IsNullOrEmpty(t.Task.Result.Exception))
+            if (t.Task.Result.Exception != null)
             {
-                throw new Exception(t.Task.Result.Exception);
+                throw new Exception(t.Task.Result.Exception.ToString());
             }
 
             context.ReturnValue = t.Task.Result.ReturnValue;

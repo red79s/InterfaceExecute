@@ -1,8 +1,10 @@
-﻿namespace Eloe.InterfaceSerializer.DataPacket
+﻿using System;
+
+namespace Eloe.InterfaceSerializer.DataPacket
 {
     public interface IFunctionReturnDataPacketEncoding
     {
         FunctionReturnDataPacket Decode(byte[] data);
-        byte[] Encode(int id, string returnValue, string exception);
+        byte[] Encode(FunctionReturnDataPacket dataPacket);
     }
 }

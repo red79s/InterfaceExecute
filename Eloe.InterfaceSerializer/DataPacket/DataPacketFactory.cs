@@ -1,4 +1,8 @@
-﻿namespace Eloe.InterfaceSerializer.DataPacket
+﻿using Dynamitey.DynamicObjects;
+using System;
+using System.Collections.Generic;
+
+namespace Eloe.InterfaceSerializer.DataPacket
 {
     public class DataPacketFactory : IDataPacketFactory
     {
@@ -15,15 +19,23 @@
             _functionReturnDataPacketEncoding = functionReturnDataPacketEncoding;
         }
 
-        public byte[] CreateFunctionCall(int id, string className, string functionName, string functionParameters)
+        public byte[] CreateFunctionCall(int id, string className, string functionName, List<byte[]> functionParameters)
         {
-            var payload = _functionDataPacketEncoding.Encode(id, className, functionName, functionParameters);
+            var dataPacket = new FunctionDataPacket
+            {
+                Id = id,
+                ClassName = className,
+                FunctionName = functionName,
+                FunctionParameters = functionParameters
+            };
+            var payload = _functionDataPacketEncoding.Encode(dataPacket);
             return _dataPacketEncoding.Encode(DataPacketType.FunctionCall, payload);
         }
 
-        public byte[] CreateFuctionReturnCall(int id, string returnValue, string exception)
+        public byte[] CreateFuctionReturnCall(int id, byte[] returnValue, Exception exception)
         {
-            var payload = _functionReturnDataPacketEncoding.Encode(id, returnValue, exception);
+            var dataPacket = new FunctionReturnDataPacket { Id = id, ReturnValue = returnValue, Exception = exception };
+            var payload = _functionReturnDataPacketEncoding.Encode(dataPacket);
             return _dataPacketEncoding.Encode(DataPacketType.FunctionReturn, payload);
         }
 

@@ -14,7 +14,7 @@ namespace Eloe.InterfaceRpc
         private object _sendLock = new object();
 
         private InterfaceRpcReceiveCollectionSendReceive _receiveCollection;
-        private InterfaceRpcSendCollectionSendReceive _sendCollection;
+        private InterfaceRpcSendCollection _sendCollection;
 
         public InterfaceRpcServerBase(ILogger logger, bool logComunication = false)
         {
@@ -23,12 +23,22 @@ namespace Eloe.InterfaceRpc
 
             _receiveCollection = new InterfaceRpcReceiveCollectionSendReceive(_dataPacketFactory, logger);
             _receiveCollection.OnSendData += HandleOnSendData;
-            _sendCollection = new InterfaceRpcSendCollectionSendReceive(_dataPacketFactory, logger);
+            _sendCollection = new InterfaceRpcSendCollection(_dataPacketFactory, logger);
             _sendCollection.OnSendData += HandleOnSendData;
 
             _logger = logger;
 
             _logComunication = logComunication;
+        }
+
+        protected void OnConnected()
+        {
+            _sendCollection.OnConnected();
+        }
+
+        protected void OnDisconnected()
+        {
+            _sendCollection.OnDisconnected();
         }
 
         protected void OnMessageReceived(MessageReceivedServerArgs e)

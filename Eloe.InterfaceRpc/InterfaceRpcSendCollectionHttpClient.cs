@@ -56,7 +56,7 @@ namespace Eloe.InterfaceRpc
                 Id = id,
                 ClassName = context.InterfaceFullName,
                 FunctionName = context.UniqueMethodName,
-                FunctionParameters = context.Payload
+                FunctionParameters = context.MethodParameters
             };
             
             var functionDataPacketSerialized = JsonConvert.SerializeObject(functionDataPacket);
@@ -69,7 +69,7 @@ namespace Eloe.InterfaceRpc
                 var functionReturnData = JsonConvert.DeserializeObject<FunctionReturnDataPacket>(resultContent);
                 if (functionReturnData.Exception != null)
                 {
-                    context.Exception = new Exception(functionReturnData.Exception);
+                    context.Exception = functionReturnData.Exception;
                 }
                 else
                 {

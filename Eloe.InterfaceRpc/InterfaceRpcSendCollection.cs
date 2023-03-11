@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
 {
-    public class InterfaceRpcSendCollectionSendReceive
+    public class InterfaceRpcSendCollection
     {
         public EventHandler<SendDataInfo> OnSendData;
 
@@ -20,7 +20,7 @@ namespace Eloe.InterfaceRpc
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
-        public InterfaceRpcSendCollectionSendReceive(
+        public InterfaceRpcSendCollection(
             IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {
@@ -128,7 +128,7 @@ namespace Eloe.InterfaceRpc
                 _waitingForReturnValues.Add(id, t);
             }
 
-            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.Payload);
+            var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.MethodParameters);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
             
             //allow all functions waiting for return value to be canceled in case of a disconnect.
@@ -161,9 +161,9 @@ namespace Eloe.InterfaceRpc
                 return;
             }
 
-            if (!string.IsNullOrEmpty(t.Task.Result.Exception))
+            if (t.Task.Result.Exception != null)
             {
-                context.Exception = new Exception(t.Task.Result.Exception);
+                context.Exception = t.Task.Result.Exception;
                 return;
             }
             

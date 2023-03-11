@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.4.59" />
     <PackageReference Include="WatsonWebsocket" Version="4.0.4" />
   </ItemGroup>
 

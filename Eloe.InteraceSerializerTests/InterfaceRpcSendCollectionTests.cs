@@ -21,10 +21,10 @@ namespace Eloe.InteraceSerializerTests
         public void TestCancelExecution()
         {
             var dataPacketEncoder = new DataPacketEncoding();
-            var functionDataPacketEncoder = new FunctionDataPacketEncoding();
+            var functionDataPacketEncoder = new FunctionDataPacketEncoding(new MsgPackParameterSerializer());
             var functionReturnDataPacketEncoder = new FunctionReturnDataPacketEncoding();
             var dataPacketFactory = new DataPacketFactory(dataPacketEncoder, functionDataPacketEncoder, functionReturnDataPacketEncoder);
-            var col = new InterfaceRpcSendCollectionSendReceive(dataPacketFactory, _logger.Object);
+            var col = new InterfaceRpcSendCollection(dataPacketFactory, _logger.Object);
             var interf = col.AddProxyCallbackInterface<ITestInterface>();
             try
             {

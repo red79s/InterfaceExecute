@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.4.59" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj" />
   </ItemGroup>
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Eloe.InterfaceSerializer
 {
-    public class ParameterConvert : IParameterSerializer
+    public class ParameterConvert //: IParameterSerializer
     {
         public string Serialize(string name, Type type, object value)
         {

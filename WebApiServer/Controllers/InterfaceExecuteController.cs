@@ -55,7 +55,7 @@ namespace WebApiServer.Controllers
             }
             catch (Exception ex)
             {
-                return JsonConvert.SerializeObject(new FunctionReturnDataPacket { Exception = $"Unhandled exception: {ex}" });
+                return JsonConvert.SerializeObject(new FunctionReturnDataPacket { Exception = new Exception($"Unhandled exception: {ex}") });
             }
         }
     }

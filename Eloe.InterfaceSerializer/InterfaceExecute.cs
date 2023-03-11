@@ -18,11 +18,12 @@ namespace Eloe.InterfaceSerializer
         public string InterfaceName { get; private set; }
         public string InterfaceFullName { get; private set; }
         private readonly T _instance;
-        private IParameterSerializer _parameterSerializer = new ParameterConvert();
+        private IParameterSerializer _parameterSerializer;
         public string ClientId { get; set; }
 
-        public InterfaceExecute(T instance)
+        public InterfaceExecute(T instance, IInterfaceSerializerOptions options = null)
         {
+            SetOptions(options);
             InterfaceType = typeof(T);
             InterfaceName = InterfaceType.Name;
             InterfaceFullName = InterfaceType.FullName;
@@ -30,12 +31,23 @@ namespace Eloe.InterfaceSerializer
             Methods = GetMethodAndTypeInfo(instance);
         }
 
-        public InterfaceExecute()
+        public InterfaceExecute(IInterfaceSerializerOptions options = null)
         {
+            SetOptions(options);
             InterfaceType = typeof(T);
             InterfaceName = InterfaceType.Name;
             InterfaceFullName = InterfaceType.FullName;
             Methods = GetMethodAndTypeInfo();
+        }
+
+        private void SetOptions(IInterfaceSerializerOptions options)
+        {
+            if (options == null)
+            {
+                options = new InterfaceSerializerOptions { ParameterSerializer = new MsgPackParameterSerializer() };
+            }
+
+            _parameterSerializer = options.ParameterSerializer;
         }
 
         public T GetInterface()
@@ -58,7 +70,7 @@ namespace Eloe.InterfaceSerializer
                 InterfaceFullName = InterfaceFullName,
                 MethodName = method.Name,
                 UniqueMethodName = method.UniqueName,
-                Payload = _parameterSerializer.Serialize(method.Parameters, invocation.Arguments.ToList()),
+                MethodParameters = SerializeMethodParameters(method.Parameters, invocation.Arguments),
                 HaveReturnValue = method.ReturnType != typeof(void),
                 ReturnType = method.ReturnType,
                 ClientId = ClientId
@@ -75,11 +87,6 @@ namespace Eloe.InterfaceSerializer
                     if (executionContext.Exception != null)
                     {
                         taskCompleter.SetException(executionContext.Exception);
-                    }
-                    else if (method.ReturnType != null)
-                    {
-                        var obj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType, executionContext.ReturnValue);
-                        taskCompleter.SetResult(obj);
                     }
                     else
                     {
@@ -106,7 +113,7 @@ namespace Eloe.InterfaceSerializer
                     {
                         setException.Invoke(taskCompleterInstance, new object[] { executionContext.Exception });
                     }
-                    else if (method.ReturnType != null)
+                    else if (method.ReturnType != null && method.ReturnType != typeof(void))
                     {
                         var returnObj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType.GenericTypeArguments[0], executionContext.ReturnValue);
                         setResult.Invoke(taskCompleterInstance, new object[] { returnObj });
@@ -122,12 +129,22 @@ namespace Eloe.InterfaceSerializer
                     throw new Exception($"Unhandled exception in {executionContext.InterfaceFullName}.{executionContext.MethodName}", executionContext.Exception);
                 }
 
-                if (method.ReturnType != null)
+                if (method.ReturnType != null && method.ReturnType != typeof(void))
                 {
                     invocation.ReturnValue =
                         _parameterSerializer.Deserialize("ReturnValue", method.ReturnType, executionContext.ReturnValue);
                 }
             }
+        }
+
+        private List<byte[]> SerializeMethodParameters(List<ParameterInf> parametersInfo, object[] arguments)
+        {
+            var parameters = new List<byte[]>();
+            for (int i = 0; i < parametersInfo.Count; i++)
+            {
+                parameters.Add(_parameterSerializer.Serialize(parametersInfo[i].Name, parametersInfo[i].Type, arguments[i]));
+            }
+            return parameters;
         }
 
         public MethodInf GetMetodInfo(string uniqueMethodName)
@@ -171,7 +188,7 @@ namespace Eloe.InterfaceSerializer
             throw new Exception($"Invalid method name and parameters, there is no match for method: {methodName} with arguments: {string.Join(", ", parameterTypes.Select(x => x.Name))}");
         }
 
-        public string Execute(string uniqueMethodName, string parametersStr, string jwtToken = null, IAuthorizeHandler authorizeHandler = null)
+        public byte[] Execute(string uniqueMethodName, List<byte[]> serializedParameters, string jwtToken = null, IAuthorizeHandler authorizeHandler = null)
         {
             var methodInf = GetMetodInfo(uniqueMethodName);
             if (methodInf == null)
@@ -187,7 +204,7 @@ namespace Eloe.InterfaceSerializer
                 authorizeHandler.Authorize(jwtToken, methodInf.Authorize.Roles);
             }
 
-            var parameterObjs = _parameterSerializer.Deserialize(methodInf.Parameters, parametersStr);
+            var parameterObjs = DeserializeParameters(methodInf.Parameters, serializedParameters);
             var returnValue = methodInf.MethodInfo.Invoke(_instance, parameterObjs.ToArray());
             if (methodInf.ReturnType == null || returnValue == null)
                 return null;
@@ -205,6 +222,16 @@ namespace Eloe.InterfaceSerializer
                 return _parameterSerializer.Serialize("ReturnValue", methodInf.ReturnType.GenericTypeArguments[0], returnValueObj);
             }
             return _parameterSerializer.Serialize("ReturnValue", methodInf.ReturnType, returnValue);
+        }
+
+        private object[] DeserializeParameters(List<ParameterInf> parametersInfo, List<byte[]> serializedParameters)
+        {
+            var parameters = new object[serializedParameters.Count];
+            for (int i = 0; i < serializedParameters.Count; i++)
+            {
+                parameters[i] = _parameterSerializer.Deserialize(parametersInfo[i].Name, parametersInfo[i].Type, serializedParameters[i]);
+            }
+            return parameters;
         }
 
         private List<MethodInf> GetMethodAndTypeInfo(T instance = null)
@@ -251,31 +278,7 @@ namespace Eloe.InterfaceSerializer
                 methods.Add(method);
             }
 
-            if (instance != null)
-            {
-                foreach (var eventInfo in type.GetEvents())
-                {
-                    var genericMethod = new GenericMethod(paramaters => EventHandler(eventInfo, paramaters));
-
-                    var eventDelegate = Dynamic.CoerceToDelegate(genericMethod, eventInfo.EventHandlerType);
-
-                    eventInfo.AddEventHandler(instance, eventDelegate);
-                }
-            }
             return methods;
-        }
-
-        public delegate void GenericMethod(params object[] paramaters);
-
-        public void EventHandler(EventInfo eventInfo, params object[] args)
-        {
-            var parameters = _parameterSerializer.Serialize("param", args[1].GetType(), args[1]);
-            OnEventInvoked?.Invoke(this, new EventInvokeData
-            {
-                InterfaceName = InterfaceName,
-                EventName = eventInfo.Name,
-                Parameters = parameters
-            });
         }
     }
 }

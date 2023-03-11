@@ -33,7 +33,7 @@ namespace Eloe.InteraceSerializerTests
 
             Assert.AreEqual("SetItem", ctx.MethodName);
             Assert.AreEqual("Eloe.InteraceSerializerTests.ITestInterface", ctx.InterfaceFullName);
-            Assert.AreEqual("{\"item\":\"a\"}", ctx.Payload);
+            Assert.AreEqual(1, ctx.MethodParameters.Count);
             Assert.IsFalse(ctx.HaveReturnValue);
         }
 
@@ -42,19 +42,21 @@ namespace Eloe.InteraceSerializerTests
         {
             var impl = new TestInterfaceImpl();
             var executer = new InterfaceExecute<ITestInterface>(impl);
-            executer.Execute("Init:0", "{}");
+            executer.Execute("Init:0", new List<byte[]>());
             Assert.IsTrue(impl.InitCalled);
         }
 
         [TestMethod]
         public void TestSerializeGetItem()
         {
+            var options = new InterfaceSerializerOptions();
+
             SerializedExecutionContext ctx = null;
             var executer = new InterfaceExecute<ITestInterface>();
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                context.ReturnValue = "{\"ReturnValue\": \"abc\"}";
+                context.ReturnValue = options.ParameterSerializer.Serialize("", typeof(string), "abc");
             };
             var i = executer.GetInterface();
 
@@ -65,12 +67,14 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestSerializeGetItemOverload()
         {
+            var options = new InterfaceSerializerOptions();
+
             SerializedExecutionContext ctx = null;
             var executer = new InterfaceExecute<ITestInterface>();
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                context.ReturnValue = "{\"ReturnValue\": \"abc\"}";
+                context.ReturnValue = options.ParameterSerializer.Serialize("ReturnValue", typeof(string), "abc");
             };
             var i = executer.GetInterface();
 
@@ -81,22 +85,26 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestDeserializeGetItem()
         {
+            var options = new InterfaceSerializerOptions();
+
             var impl = new TestInterfaceImpl();
             impl.SetItem("a");
             var executer = new InterfaceExecute<ITestInterface>(impl);
-            var res = executer.Execute("GetItem:0", "{\"itemKey\": \"a\"}");
-            Assert.AreEqual("{\"ReturnValue\": \"a\"}", res);
+            var res = executer.Execute("GetItem:0", new List<byte[]> { options.ParameterSerializer.Serialize("itemKey", typeof(string), "a") });
+            Assert.AreEqual("a", options.ParameterSerializer.Deserialize("", typeof(string), res));
         }
 
         [TestMethod]
         public void TestSerializeTaskReturnValue()
         {
+            var options = new InterfaceSerializerOptions();
+
             SerializedExecutionContext ctx = null;
             var executer = new InterfaceExecute<ITestInterface>();
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                context.ReturnValue = "";
+                context.ReturnValue = null;
             };
             var i = executer.GetInterface();
 
@@ -107,12 +115,13 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestSerializeTaskOfBoolReturnValue()
         {
+            var options = new InterfaceSerializerOptions();
             SerializedExecutionContext ctx = null;
             var executer = new InterfaceExecute<ITestInterface>();
             executer.OnExecute += (sender, context) =>
             {
                 ctx = context;
-                context.ReturnValue = "{\"ReturnValue\": true}";
+                context.ReturnValue = options.ParameterSerializer.Serialize("ReturnValue", typeof(bool), true);
             };
             var i = executer.GetInterface();
 
@@ -125,25 +134,39 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestDeserializeTaskOfBoolReturnValue()
         {
+            var options = new InterfaceSerializerOptions();
             var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
-            var res = executer.Execute("SendMessage:1", "{\"message\":\"hello\", \"num\": 23}");
-            Assert.AreEqual("{\"ReturnValue\": \"True\"}", res);
+            var res = executer.Execute("SendMessage:1", new List<byte[]>
+            {
+                options.ParameterSerializer.Serialize("message", typeof(string), "hello"),
+                options.ParameterSerializer.Serialize("num", typeof(int), 23)
+            });
+            Assert.AreEqual(true, options.ParameterSerializer.Deserialize("", typeof(bool), res));
         }
 
         [TestMethod]
         public void TestDeserializeTaskReturnValue()
         {
+            var options = new InterfaceSerializerOptions();
             var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
-            var res = executer.Execute("SendMessage:0", "{\"message\":\"hello\"}");
+                var res = executer.Execute("SendMessage:0", new List<byte[]>
+                {
+                    options.ParameterSerializer.Serialize("message", typeof(string), "hello")
+                });
             Assert.IsNull(res);
         }
 
         [TestMethod]
         public void TestAuthorize()
         {
+            var options = new InterfaceSerializerOptions();
             var authHandler = new AuthHandlerTest("abc", new List<string> { "Admin", "User" });
             var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
-            var res = executer.Execute("WithAuth:0", "{\"num\":10}", "abc", authHandler);
+            var res = executer.Execute("WithAuth:0", new List<byte[]>
+                {
+                    options.ParameterSerializer.Serialize("num", typeof(int), 10)
+                }, 
+                "abc", authHandler);
             Assert.IsNotNull(res);
         }
 
@@ -151,9 +174,14 @@ namespace Eloe.InteraceSerializerTests
         [TestMethod]
         public void TestAuthorizeFail()
         {
+            var options = new InterfaceSerializerOptions();
             var authHandler = new AuthHandlerTest("abc", new List<string> { "Admin", "User" });
             var executer = new InterfaceExecute<ITestInterface>(new TestInterfaceImpl());
-            var res = executer.Execute("WithAuth:0", "{\"num\":10}", "abcd", authHandler);
+            var res = executer.Execute("WithAuth:0", new List<byte[]>
+                {
+                    options.ParameterSerializer.Serialize("num", typeof(int), 10)
+                },
+                "abcd", authHandler);
             Assert.IsNotNull(res);
         }
 

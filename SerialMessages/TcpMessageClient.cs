@@ -44,7 +44,7 @@ namespace SerialMessages
             iExec.OnExecute += (s, c) =>
             {
                 string id = GetNextId();
-                var funcCallMsg = new FunctionCallMessage(id, iExec.InterfaceName, c.MethodName, c.Payload);
+                var funcCallMsg = new FunctionCallMessage(id, iExec.InterfaceName, c.MethodName, c.MethodParameters);
                 var data = _dataMessageManager.EncodeMessage(funcCallMsg);
                 Send(data);
                 if (c.HaveReturnValue)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Eloe.InterfaceSerializer
 {
@@ -6,7 +7,7 @@ namespace Eloe.InterfaceSerializer
     {
         Type InterfaceType { get; }
         MethodInf GetMetodInfo(string method);
-        string Execute(string method, string parametersStr, string jwtToken = null, IAuthorizeHandler authorizeHandler = null);
+        byte[] Execute(string method, List<byte[]> serializeParameters, string jwtToken = null, IAuthorizeHandler authorizeHandler = null);
         string ClientId { get; }
     }
 }

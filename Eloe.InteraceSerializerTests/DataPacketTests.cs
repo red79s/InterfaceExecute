@@ -1,6 +1,7 @@
 ﻿using Eloe.InterfaceSerializer.DataPacket;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 
 namespace Eloe.InteraceSerializerTests
 {
@@ -40,27 +41,26 @@ namespace Eloe.InteraceSerializerTests
         public void EncodeAndDecodeFunctionNoData()
         {
             var fdp = new FunctionDataPacketEncoding();
-            var buffer = fdp.Encode(55, "", "", "");
-            Assert.AreEqual(16, buffer.Length);
-
+            var buffer = fdp.Encode(new FunctionDataPacket { Id = 55, ClassName = "", FunctionName = "", FunctionParameters = null });
+            
             var fInfo = fdp.Decode(buffer);
             Assert.AreEqual(55, fInfo.Id);
             Assert.AreEqual("", fInfo.ClassName);
             Assert.AreEqual("", fInfo.FunctionName);
-            Assert.AreEqual("", fInfo.FunctionParameters);
+            Assert.AreEqual(null, fInfo.FunctionParameters);
         }
 
         [TestMethod]
         public void EncodeAndDecodeFunction()
         {
             var fdp = new FunctionDataPacketEncoding();
-            var buffer = fdp.Encode(55, "ClassA", "Func_B", "{some encoded data}");
+            var buffer = fdp.Encode(new FunctionDataPacket { Id = 55, ClassName = "ClassA", FunctionName = "Func_B", FunctionParameters = new List<byte[]> { new byte[] { 30, 32 } } });
 
             var fInfo = fdp.Decode(buffer);
             Assert.AreEqual(55, fInfo.Id);
             Assert.AreEqual("ClassA", fInfo.ClassName);
             Assert.AreEqual("Func_B", fInfo.FunctionName);
-            Assert.AreEqual("{some encoded data}", fInfo.FunctionParameters);
+            Assert.AreEqual(32, fInfo.FunctionParameters[0][1]);
         }
     }
 }

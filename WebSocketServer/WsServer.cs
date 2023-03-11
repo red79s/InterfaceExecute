@@ -35,6 +35,8 @@ namespace WebSocketServer
         private void _server_ClientDisconnected(object? sender, DisconnectionEventArgs e)
         {
             _logger.Debug($"Client disconnected, Ip: {e.Client.Ip}, Port: {e.Client.Port}");
+
+            OnDisconnected();
             OnClientDisconnected?.Invoke(this, new ClientInfo { ClientId = e.Client.Guid.ToString() });
         }
 
@@ -42,6 +44,7 @@ namespace WebSocketServer
         {
             _logger.Debug($"Client connected, Ip: {e.Client.Ip}, Port: {e.Client.Port}");
 
+            OnConnected();
             OnClientConnected?.Invoke(this, new ClientInfo { ClientId = e.Client.Guid.ToString() });
         }
 

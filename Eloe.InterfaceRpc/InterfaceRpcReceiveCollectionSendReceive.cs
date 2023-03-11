@@ -43,7 +43,7 @@ namespace Eloe.InterfaceRpc
                 if (impl.Key == null)
                 {
                     _logger.Warn($"Received call for class: {package.ClassName} that have no registered implementations");
-                    returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, "", $"Received call for class: {package.ClassName} that have no registered implementations");
+                    returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, null, new Exception($"Received call for class: {package.ClassName} that have no registered implementations"));
                 }
 
                 if (returnPackage == null)
@@ -56,7 +56,7 @@ namespace Eloe.InterfaceRpc
                     }
                     catch (Exception ex)
                     {
-                        returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, "", ex.ToString());
+                        returnPackage = _dataPacketFactory.CreateFuctionReturnCall(package.Id, null, ex);
                     }
                 }
 

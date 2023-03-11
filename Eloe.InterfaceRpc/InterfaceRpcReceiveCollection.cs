@@ -26,7 +26,7 @@ namespace Eloe.InterfaceRpc
                 return new FunctionReturnDataPacket
                 {
                     Id = package.Id,
-                    Exception = $"Received call for class: {package.ClassName} that have no registered implementations"
+                    Exception = new Exception($"Received call for class: {package.ClassName} that have no registered implementations")
                 };
             }
 
@@ -45,7 +45,7 @@ namespace Eloe.InterfaceRpc
                 return new FunctionReturnDataPacket
                 {
                     Id = package.Id,
-                    Exception = ex.ToString()
+                    Exception = ex
                 };
             }
         }
