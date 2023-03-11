@@ -12,7 +12,6 @@ internal class Program
         var logger = new Logger();
         var server = new WsServer("localhost", 9000, logger);
         server.ImplementInterface<IServerFunctions>(new ServerInterfaceImpl());
-        //var clientCallback = server.AddClientCallbackInterface<IClientCallbackFunctions>("client1");
         server.Start();
         Console.WriteLine("Server started");
 
