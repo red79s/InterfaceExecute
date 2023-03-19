@@ -1,5 +1,6 @@
 ﻿using Eloe.InterfaceRpc;
 using Eloe.InterfaceSerializer;
+using System.Text;
 using WatsonWebsocket;
 
 namespace WebSocketServer
@@ -22,7 +23,7 @@ namespace WebSocketServer
         public event EventHandler<ClientInfo>? OnClientDisconnected;
 
         public WsServer(string hostname, int port, ILogger logger)
-            : base(logger, false)
+            : base(logger, true)
         {
             _logger = logger;
 
@@ -55,6 +56,9 @@ namespace WebSocketServer
 
         private void _server_MessageReceived(object? sender, MessageReceivedEventArgs e)
         {
+            var msg = Encoding.UTF8.GetString(e.Data);
+            _logger.Debug($"Message received: {msg}");
+
             OnMessageReceived(new MessageReceivedServerArgs { ClientId = e.Client.Guid.ToString(), Data = e.Data.ToArray() });
         }
 
@@ -62,6 +66,8 @@ namespace WebSocketServer
         {
             if (string.IsNullOrEmpty(e.ClientId))
                 throw new ArgumentOutOfRangeException(nameof(e.ClientId));
+
+            _logger.Debug("Sending data: " + Encoding.UTF8.GetString(e.Data));
 
             var guid = Guid.Parse(e.ClientId);
             return _server.SendAsync(guid, e.Data);

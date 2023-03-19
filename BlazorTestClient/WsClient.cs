@@ -6,7 +6,7 @@ using WatsonWebsocket;
 
 namespace BlazorTestClient
 {
-    public class WsClient : InterfaceRpcClientBase
+    public class WsClient : InterfaceRpcWasmClientBase
     {
         private ClientWebSocket _client;
         private CancellationToken _cancellationToken;
@@ -20,6 +20,7 @@ namespace BlazorTestClient
         public async Task Connect(string hostname, int port)
         {
             await _client.ConnectAsync(new Uri($"ws://{hostname}:{port}"), _cancellationToken);
+            OnConnected();
             _ = ReceiveLoop();
         }
 
@@ -36,12 +37,18 @@ namespace BlazorTestClient
                 messageBuffer.AddRange(buffer.Take(received.Count));
                 if (received.EndOfMessage)
                 {
+                    var msg = Encoding.UTF8.GetString(messageBuffer.ToArray());
+                    Console.WriteLine("Receive loop: " + msg);
                     OnMessageReceived(new MessageReceivedClientArgs { Data = messageBuffer.ToArray() });
                     messageBuffer.Clear();
                 }
             }
         }
 
+        public Task<bool> SendDataAsync(byte[] data)
+        {
+            return SendAsync(new SendDataInfo { Data = data });
+        }
         protected override async Task<bool> SendAsync(SendDataInfo e)
         {
             await _client.SendAsync(e.Data, WebSocketMessageType.Binary, WebSocketMessageFlags.EndOfMessage, _cancellationToken);

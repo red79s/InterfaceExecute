@@ -2,6 +2,7 @@
 @using System.Net.WebSockets;
 @using System.Text;
 @using ClientServerComDef;
+@using Eloe.InterfaceSerializer;
 
 <PageTitle>Counter</PageTitle>
 
@@ -9,6 +10,7 @@
 
 <p role="status">Current count: @currentCount</p>
 <p>Returned counter: @returnedCounter</p>
+<p>Exception: @exception</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 <button class="btn btn-primary" @onclick="ConnectToServer">Connect to server</button>
@@ -16,7 +18,9 @@
 @code {
     private int currentCount = 0;
     private int returnedCounter = 0;
-    private MyLogger _logger = new MyLogger();
+    private string exception = "";
+
+    private SimpleConsoleLogger _logger = new SimpleConsoleLogger();
     private WsClient? _client;
     private IServerFunctions? _serverFunctions;
     private void IncrementCount()
@@ -26,15 +30,39 @@
 
     private async void ConnectToServer()
     {
-        if (_client == null)
+        try
         {
-            _client = new WsClient(_logger);
-            await _client.Connect("localhost", 9000);
-            _serverFunctions = _client.AddServerInterface<IServerFunctions>();
+            if (_client == null)
+            {
+                _client = new WsClient(_logger);
+                await _client.Connect("localhost", 9000);
+                _serverFunctions = _client.AddServerInterface<IServerFunctions>();
+                _client.ImplementInterface<IClientCallbackFunctions>(new ClientCallbackFunctions());
+            }
+
+            //_serverFunctions.WriteMessage($"Hello from wasm: {currentCount}");
+            Console.WriteLine("Calling Process");
+            var pres = await _serverFunctions.Process(currentCount);
+            Console.WriteLine($"Process returned: {pres.ProcessingTimeInMs}");
+            returnedCounter = (int)pres.ProcessingTimeInMs;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            exception = ex.ToString();
+        }
+    }
+
+    private class ClientCallbackFunctions : IClientCallbackFunctions
+    {
+        public ClientCallbackFunctions()
+        {
         }
 
-        var pres = _serverFunctions.Process(currentCount).Result;
-        returnedCounter = (int)pres.ProcessingTimeInMs;
-
+        public bool DispalayMessage(MessageInfo mi)
+        {
+            return true;
+        }
     }
 }

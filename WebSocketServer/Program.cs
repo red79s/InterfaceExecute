@@ -9,7 +9,7 @@ internal class Program
     private static void Main(string[] args)
     {
         Console.WriteLine("Starting ws server");
-        var logger = new Logger();
+        var logger = new SimpleConsoleLogger();
         var server = new WsServer("localhost", 9000, logger);
         server.ImplementInterface<IServerFunctions>(new ServerInterfaceImpl());
         server.Start();
@@ -49,34 +49,6 @@ internal class Program
         public void WriteMessage(string message)
         {
             Console.WriteLine("In WriteMessage: " + message);
-        }
-    }
-
-    private class Logger : ILogger
-    {
-        public void Debug(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Error(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Fatal(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Info(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Warn(string message)
-        {
-            Console.WriteLine(message);
         }
     }
 }

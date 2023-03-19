@@ -20,24 +20,24 @@ namespace WebApiServer.Controllers
 
         //[Authorize]
         [HttpPost("~/InterfaceExecute/Execute")]
-        public async Task<string> Execute()
+        public async Task<string> Execute([FromBody]FunctionDataPacket funcData)
         {
             try
             {
                 var authHandler = new JwtAuthorizeHandler("https://auth.apx-systems.com/", new List<string> { "APX" });
                 await authHandler.GetAuthServerConfiguration();
 
-                string executeArguments = "";
-                using (StreamReader stream = new StreamReader(Request.Body))
-                {
-                    executeArguments = stream.ReadToEndAsync().Result;
-                }
+                //string executeArguments = "";
+                //using (StreamReader stream = new StreamReader(Request.Body))
+                //{
+                //    executeArguments = stream.ReadToEndAsync().Result;
+                //}
 
-                var funcData = JsonConvert.DeserializeObject<FunctionDataPacket>(executeArguments);
-                if (funcData == null)
-                {
-                    throw new Exception("Invalid arguments");
-                }
+                //var funcData = JsonConvert.DeserializeObject<FunctionDataPacket>(executeArguments);
+                //if (funcData == null)
+                //{
+                //    throw new Exception("Invalid arguments");
+                //}
 
                 var authHeader = Request.Headers.Authorization.ToString();
                 if (authHeader != null)

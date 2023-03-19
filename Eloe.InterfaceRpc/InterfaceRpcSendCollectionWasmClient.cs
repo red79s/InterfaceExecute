@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
 {
-    public class InterfaceRpcSendCollection
+    public class InterfaceRpcSendCollectionWasmClient
     {
         public EventHandler<SendDataInfo> OnSendData;
 
@@ -20,7 +20,7 @@ namespace Eloe.InterfaceRpc
         private object _lockObj = new object();
         private int _functionReturnWaitTime = 30000;
 
-        public InterfaceRpcSendCollection(
+        public InterfaceRpcSendCollectionWasmClient(
             IDataPacketFactory dataPacketFactory,
             ILogger logger)
         {
@@ -46,8 +46,10 @@ namespace Eloe.InterfaceRpc
 
             lock (_lockObj)
             {
+                Console.WriteLine($"HandleFunctionReturn: {packet.Id}");
                 if (_waitingForReturnValues.ContainsKey(packet.Id))
                 {
+                    Console.WriteLine("found task");
                     taskCompletionSource = _waitingForReturnValues[packet.Id];
                     _waitingForReturnValues.Remove(packet.Id);
                 }
@@ -59,6 +61,7 @@ namespace Eloe.InterfaceRpc
 
             if (taskCompletionSource != null)
             {
+                Console.WriteLine("Signaling task");
                 taskCompletionSource.SetResult(packet);
             }
         }
@@ -113,7 +116,8 @@ namespace Eloe.InterfaceRpc
         private object _cacellationLockObj = new object();
         private List<CancellationTokenSource> _cancellationTokenSources = new List<CancellationTokenSource>();
         private volatile int _nextFunctionId = 1;
-        private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
+
+        private async Task HandleProxyCallbackOnExecuteAsync(object sender, SerializedExecutionContext context)
         {
             if (!_connected)
             {
@@ -131,33 +135,46 @@ namespace Eloe.InterfaceRpc
 
             var package = _dataPacketFactory.CreateFunctionCall(id, context.InterfaceFullName, context.UniqueMethodName, context.MethodParameters);
             OnSendData?.Invoke(this, new SendDataInfo { ClientId = context.ClientId, Data = package });
-            
+
+            Console.WriteLine("Sent data to server: " + context.UniqueMethodName);
             //allow all functions waiting for return value to be canceled in case of a disconnect.
-            var cancellationToken = new CancellationTokenSource();
-            lock (_cacellationLockObj)
-            {
-                _cancellationTokenSources.Add(cancellationToken);
-            }
+            //var cancellationToken = new CancellationTokenSource();
+            //lock (_cacellationLockObj)
+            //{
+            //    _cancellationTokenSources.Add(cancellationToken);
+            //}
 
             try
             {
-                var timeoutElapsed = !t.Task.Wait(_functionReturnWaitTime, cancellationToken.Token);
-                lock (_cacellationLockObj)
-                {
-                    _cancellationTokenSources.Remove(cancellationToken);
-                }
-                if (timeoutElapsed)
-                {
-                    context.Exception = new Exception("timeout while waiting for function return");
-                    return;
-                }
+                await t.Task;
+                //while (true)
+                //{
+                //    Console.WriteLine($"IsCompleted: {t.Task.IsCompleted}");
+                //    if (t.Task.IsCompleted)
+                //    { 
+                //        break; 
+                //    }
+                //}
+                //t.Task.Wait();
+                Console.WriteLine($"Task was finished");
+                //var timeoutElapsed = false;
+                ////var timeoutElapsed = !t.Task.Wait(_functionReturnWaitTime, cancellationToken.Token);
+                //lock (_cacellationLockObj)
+                //{
+                //    _cancellationTokenSources.Remove(cancellationToken);
+                //}
+                //if (timeoutElapsed)
+                //{
+                //    context.Exception = new Exception("timeout while waiting for function return");
+                //    return;
+                //}
             }
             catch(Exception ex)
             {
-                lock (_cacellationLockObj)
-                {
-                    _cancellationTokenSources.Remove(cancellationToken);
-                }
+                //lock (_cacellationLockObj)
+                //{
+                //    _cancellationTokenSources.Remove(cancellationToken);
+                //}
                 context.Exception = new Exception($"Function call was canceled, ex: {ex.Message}");
                 return;
             }
@@ -167,13 +184,13 @@ namespace Eloe.InterfaceRpc
                 context.Exception = t.Task.Result.Exception;
                 return;
             }
-            
+
+            Console.WriteLine($"Returning from HandleProxyCallbackOnExecute: {context.UniqueMethodName}");
             context.ReturnValue = t.Task.Result.ReturnValue;
         }
-
-        private Task HandleProxyCallbackOnExecuteAsync(object sender, SerializedExecutionContext context)
+        private void HandleProxyCallbackOnExecute(object sender, SerializedExecutionContext context)
         {
-            return Task.Run(() => HandleProxyCallbackOnExecute(sender, context));
+            context.Exception = new Exception("Calls must be async on this platoform");
         }
     }
 }

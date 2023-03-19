@@ -11,7 +11,7 @@ namespace WebSocketClient
         static void Main(string[] args)
         {
             Console.WriteLine("Connecting");
-            var logger = new Logger();
+            var logger = new SimpleConsoleLogger();
             var client = new WsClient(logger);
             var serverFunctions = client.AddServerInterface<IServerFunctions>();
             client.ImplementInterface<IClientCallbackFunctions>(new ClientCallbackImpl());
@@ -65,31 +65,5 @@ namespace WebSocketClient
         }
     }
 
-    internal class Logger : ILogger
-    {
-        public void Debug(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Error(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Fatal(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Info(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Warn(string message)
-        {
-            Console.WriteLine(message);
-        }
-    }
+    
 }

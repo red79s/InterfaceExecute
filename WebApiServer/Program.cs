@@ -1,5 +1,6 @@
 using ClientServerComDef;
 using Eloe.InterfaceRpc;
+using Eloe.InterfaceSerializer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
@@ -63,7 +64,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddScoped<Eloe.InterfaceSerializer.ILogger, WebApiServer.Logger>();
+builder.Services.AddScoped<Eloe.InterfaceSerializer.ILogger, SimpleConsoleLogger>();
 builder.Services.AddScoped<IInterfaceRpcReceiveCollection, InterfaceRpcReceiveCollection>();
 builder.Services.AddScoped<InterfaceExecuteFactory>();
 

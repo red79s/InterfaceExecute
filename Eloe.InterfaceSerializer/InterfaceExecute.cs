@@ -10,9 +10,9 @@ namespace Eloe.InterfaceSerializer
 {
     public class InterfaceExecute<T> : IInterceptor, IInterfaceExecute where T : class
     {
+        public delegate Task ExecuteDelegate(object sender, SerializedExecutionContext context);
+        public ExecuteDelegate OnExecuteAsync;
         public EventHandler<SerializedExecutionContext> OnExecute;
-        public EventHandler<EventInvokeData> OnEventInvoked;
-
         public Type InterfaceType { get; private set; }
         public List<MethodInf> Methods { get; }
         public string InterfaceName { get; private set; }
@@ -56,7 +56,7 @@ namespace Eloe.InterfaceSerializer
             return generator.CreateInterfaceProxyWithoutTarget<T>(this);
         }
 
-        public void Intercept(IInvocation invocation)
+        public async void Intercept(IInvocation invocation)
         {
             var parameterTypes = new List<Type>();
             foreach (var parameter in invocation.Arguments)
@@ -80,19 +80,17 @@ namespace Eloe.InterfaceSerializer
             {
                 var taskCompleter = new TaskCompletionSource<object>();
                 invocation.ReturnValue = taskCompleter.Task;
-                Task.Run(() =>
-                {
-                    OnExecute?.Invoke(this, executionContext);
+                
+                await OnExecuteAsync?.Invoke(this, executionContext);
 
-                    if (executionContext.Exception != null)
-                    {
-                        taskCompleter.SetException(executionContext.Exception);
-                    }
-                    else
-                    {
-                        taskCompleter.SetResult(null);
-                    }
-                });
+                if (executionContext.Exception != null)
+                {
+                    taskCompleter.SetException(executionContext.Exception);
+                }
+                else
+                {
+                    taskCompleter.SetResult(null);
+                }
             }
             else if (method.ReturnType != null && method.ReturnType.BaseType == typeof(Task) && method.ReturnType.GenericTypeArguments.Length > 0)
             {
@@ -105,20 +103,19 @@ namespace Eloe.InterfaceSerializer
                 var setException = taskCompletionGenericType.GetMethod("SetException", new Type[] { typeof(Exception)});
 
                 invocation.ReturnValue = taskProperty.GetValue(taskCompleterInstance, null);
-                Task.Run(() =>
+                
+                Console.WriteLine($"OnExecute: {executionContext.UniqueMethodName}");
+                await OnExecuteAsync?.Invoke(this, executionContext);
+                Console.WriteLine($"OnExecute returned: {executionContext.UniqueMethodName}");
+                if (executionContext.Exception != null)
                 {
-                    OnExecute?.Invoke(this, executionContext);
-
-                    if (executionContext.Exception != null)
-                    {
-                        setException.Invoke(taskCompleterInstance, new object[] { executionContext.Exception });
-                    }
-                    else if (method.ReturnType != null && method.ReturnType != typeof(void))
-                    {
-                        var returnObj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType.GenericTypeArguments[0], executionContext.ReturnValue);
-                        setResult.Invoke(taskCompleterInstance, new object[] { returnObj });
-                    }
-                });
+                    setException.Invoke(taskCompleterInstance, new object[] { executionContext.Exception });
+                }
+                else if (method.ReturnType != null && method.ReturnType != typeof(void))
+                {
+                    var returnObj = _parameterSerializer.Deserialize("ReturnValue", method.ReturnType.GenericTypeArguments[0], executionContext.ReturnValue);
+                    setResult.Invoke(taskCompleterInstance, new object[] { returnObj });
+                }
             }
             else
             {

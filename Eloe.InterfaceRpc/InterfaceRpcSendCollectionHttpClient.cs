@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Eloe.InterfaceRpc
 {
@@ -31,6 +32,7 @@ namespace Eloe.InterfaceRpc
 
             var iExec = new InterfaceExecute<U>();
             iExec.OnExecute += HandleProxyCallbackOnExecute;
+            iExec.OnExecuteAsync += HandleProxyCallbackOnExecuteAsync;
             _proxyInterfaces.Add(iExec);
             return iExec.GetInterface();
         }
@@ -76,6 +78,41 @@ namespace Eloe.InterfaceRpc
                     context.ReturnValue = functionReturnData.ReturnValue;
                 }
             }    
+            else
+            {
+                context.Exception = new Exception($"Http error: {postResult.StatusCode}");
+            }
+        }
+
+        private async Task HandleProxyCallbackOnExecuteAsync(object sender, SerializedExecutionContext context)
+        {
+            var id = _nextFunctionId++;
+
+            var functionDataPacket = new FunctionDataPacket
+            {
+                Id = id,
+                ClassName = context.InterfaceFullName,
+                FunctionName = context.UniqueMethodName,
+                FunctionParameters = context.MethodParameters
+            };
+
+            var functionDataPacketSerialized = JsonConvert.SerializeObject(functionDataPacket);
+            var content = new StringContent(functionDataPacketSerialized);
+            var postResult = await _httpClient.PostAsync(_url, content);
+
+            if (postResult.IsSuccessStatusCode)
+            {
+                var resultContent = postResult.Content.ReadAsStringAsync().Result;
+                var functionReturnData = JsonConvert.DeserializeObject<FunctionReturnDataPacket>(resultContent);
+                if (functionReturnData.Exception != null)
+                {
+                    context.Exception = functionReturnData.Exception;
+                }
+                else
+                {
+                    context.ReturnValue = functionReturnData.ReturnValue;
+                }
+            }
             else
             {
                 context.Exception = new Exception($"Http error: {postResult.StatusCode}");
