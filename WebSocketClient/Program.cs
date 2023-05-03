@@ -43,8 +43,6 @@ namespace WebSocketClient
 
                         serverFunctions.WriteMessage($"message: {pingNum}");
                     }
-                    
-                    
                 }
                 catch (Exception ex)
                 {
@@ -64,6 +62,4 @@ namespace WebSocketClient
             return true;
         }
     }
-
-    
 }

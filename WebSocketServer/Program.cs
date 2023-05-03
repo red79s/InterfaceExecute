@@ -2,7 +2,6 @@
 using ClientServerComDef;
 using Eloe.InterfaceSerializer;
 using System.Diagnostics;
-using WebSocketServer;
 
 internal class Program
 {
