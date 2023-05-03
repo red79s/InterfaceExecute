@@ -105,6 +105,10 @@
       <Project>{2a322f36-0350-45f9-9d68-86fa49df22dd}</Project>
       <Name>Eloe.InterfaceSerializer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WebSocketInterfaceRpc\WebSocketInterfaceRpc.csproj">
+      <Project>{d009c257-a296-404b-a8fd-6acd183e5cfc}</Project>
+      <Name>WebSocketInterfaceRpc</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

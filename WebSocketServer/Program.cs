@@ -10,7 +10,7 @@ internal class Program
     {
         Console.WriteLine("Starting ws server");
         var logger = new SimpleConsoleLogger();
-        var server = new WsServer("localhost", 9000, logger);
+        var server = new WebSocketInterfaceRpc.WebSocketInterfaceRpcServer("localhost", 9085, logger);
         server.ImplementInterface<IServerFunctions>(new ServerInterfaceImpl());
         server.Start();
         Console.WriteLine("Server started");

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.4.59" />
+    <PackageReference Include="WatsonWebsocket" Version="4.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClientServerComDef\ClientServerComDef.csproj" />
+    <ProjectReference Include="..\Eloe.InterfaceRpc\Eloe.InterfaceRpc.csproj" />
+    <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj" />
+    <ProjectReference Include="..\WebSocketInterfaceRpc\WebSocketInterfaceRpc.csproj" />
+  </ItemGroup>
+
+</Project>

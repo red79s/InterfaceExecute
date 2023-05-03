@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketServer", "WebSocketServer\WebSocketServer.csproj", "{86EC638C-3BE0-4110-A430-0C901C634D54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketServerTestApp", "WebSocketServer\WebSocketServerTestApp.csproj", "{86EC638C-3BE0-4110-A430-0C901C634D54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketClient", "WebSocketClient\WebSocketClient.csproj", "{CAA59AE8-F1D2-4CC7-A500-6079216B34D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketClientTestApp", "WebSocketClient\WebSocketClientTestApp.csproj", "{CAA59AE8-F1D2-4CC7-A500-6079216B34D6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eloe.InterfaceRpc", "Eloe.InterfaceRpc\Eloe.InterfaceRpc.csproj", "{3512F3EF-79DA-455C-AEB6-DBDB9881A92C}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiServer", "WebApiServer\WebApiServer.csproj", "{19103224-0994-49E7-B1D9-7F29CB50DC54}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiClient", "WebApiClient\WebApiClient.csproj", "{1FF83E69-7C94-46EB-B84F-E1377CBEF832}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketInterfaceRpc", "WebSocketInterfaceRpc\WebSocketInterfaceRpc.csproj", "{D009C257-A296-404B-A8FD-6ACD183E5CFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{1FF83E69-7C94-46EB-B84F-E1377CBEF832}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FF83E69-7C94-46EB-B84F-E1377CBEF832}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FF83E69-7C94-46EB-B84F-E1377CBEF832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D009C257-A296-404B-A8FD-6ACD183E5CFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D009C257-A296-404B-A8FD-6ACD183E5CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D009C257-A296-404B-A8FD-6ACD183E5CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D009C257-A296-404B-A8FD-6ACD183E5CFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

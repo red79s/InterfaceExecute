@@ -6,12 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using WatsonWebsocket;
 
-namespace WebSocketClient
+namespace WebSocketInterfaceRpc
 {
-    internal class WsClient : InterfaceRpcClientBase
+    public class WebSocketInterfaceRpcClient : InterfaceRpcClientBase
     {
         private WatsonWsClient _client;
-        public WsClient(ILogger logger)
+        public WebSocketInterfaceRpcClient(ILogger logger)
             : base(logger, false)
         {
         }
@@ -77,7 +77,7 @@ namespace WebSocketClient
                 Connect(hostname, port, IncrementDelay(delayInMs));
             }
         }
-        
+
         private int IncrementDelay(int delayInMs)
         {
             var newDelayInMs = delayInMs * 2;

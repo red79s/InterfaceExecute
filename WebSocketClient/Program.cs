@@ -12,10 +12,10 @@ namespace WebSocketClient
         {
             Console.WriteLine("Connecting");
             var logger = new SimpleConsoleLogger();
-            var client = new WsClient(logger);
+            var client = new WebSocketInterfaceRpc.WebSocketInterfaceRpcClient(logger);
             var serverFunctions = client.AddServerInterface<IServerFunctions>();
             client.ImplementInterface<IClientCallbackFunctions>(new ClientCallbackImpl());
-            client.Connect("localhost", 9000);
+            client.Connect("localhost", 9085);
             Console.WriteLine("connected");
 
             int pingNum = 1;
