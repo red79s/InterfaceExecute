@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using WebApiClent;
 
-namespace WebApiClient
+namespace Eloe.WebApiClient
 {
     internal class TokenManager
     {

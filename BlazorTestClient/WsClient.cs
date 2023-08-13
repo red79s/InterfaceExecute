@@ -4,13 +4,13 @@ using System.Net.WebSockets;
 using System.Text;
 using WatsonWebsocket;
 
-namespace BlazorTestClient
+namespace Eloe.BlazorTestClient
 {
     public class WsClient : InterfaceRpcWasmClientBase
     {
         private ClientWebSocket _client;
         private CancellationToken _cancellationToken;
-        public WsClient(Eloe.InterfaceSerializer.ILogger logger)
+        public WsClient(InterfaceSerializer.ILogger logger)
             : base(logger, true)
         {
             _client = new ClientWebSocket();

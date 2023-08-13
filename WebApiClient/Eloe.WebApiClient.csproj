@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,14 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.108" />
-    <PackageReference Include="WatsonWebsocket" Version="4.0.8" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClientServerComDef\ClientServerComDef.csproj" />
+    <ProjectReference Include="..\ClientServerComDef\Eloe.ClientServerComDef.csproj" />
     <ProjectReference Include="..\Eloe.InterfaceRpc\Eloe.InterfaceRpc.csproj" />
     <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj" />
-    <ProjectReference Include="..\WebSocketInterfaceRpc\WebSocketInterfaceRpc.csproj" />
   </ItemGroup>
 
 </Project>

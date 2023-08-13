@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Eloe.InterfaceSerializer;
 
-namespace WebApiServer.Auth
+namespace Eloe.WebApiServer.Auth
 {
     public class JwtAuthorizeHandler : IAuthorizeHandler
     {

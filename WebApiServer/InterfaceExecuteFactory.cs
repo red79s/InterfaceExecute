@@ -1,7 +1,8 @@
-﻿using ClientServerComDef;
+﻿using Eloe.ClientServerComDef;
 using Eloe.InterfaceRpc;
+using Eloe.WebApiServer;
 
-namespace WebApiServer
+namespace Eloe.WebApiServer
 {
     public class InterfaceExecuteFactory
     {

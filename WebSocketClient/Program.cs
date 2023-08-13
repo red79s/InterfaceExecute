@@ -1,10 +1,10 @@
-﻿using ClientServerComDef;
+﻿using Eloe.ClientServerComDef;
 using Eloe.InterfaceSerializer;
 using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace WebSocketClient
+namespace Eloe.WebSocketClient
 {
     internal class Program
     {

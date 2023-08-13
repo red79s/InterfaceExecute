@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WatsonWebsocket;
 
-namespace WebSocketInterfaceRpc
+namespace Eloe.WebSocketInterfaceRpc
 {
     public class WebSocketInterfaceRpcClient : InterfaceRpcClientBase
     {

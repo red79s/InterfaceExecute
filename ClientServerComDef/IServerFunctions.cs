@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace ClientServerComDef
+namespace Eloe.ClientServerComDef
 {
     public interface IServerFunctions
     {

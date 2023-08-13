@@ -1,10 +1,10 @@
-using ClientServerComDef;
+using Eloe.ClientServerComDef;
 using Eloe.InterfaceRpc;
 using Eloe.InterfaceSerializer;
+using Eloe.WebApiServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
-using WebApiServer;
 
 var builder = WebApplication.CreateBuilder(args);
 

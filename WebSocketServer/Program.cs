@@ -1,5 +1,4 @@
-﻿
-using ClientServerComDef;
+﻿using Eloe.ClientServerComDef;
 using Eloe.InterfaceSerializer;
 using System.Diagnostics;
 
@@ -9,7 +8,7 @@ internal class Program
     {
         Console.WriteLine("Starting ws server");
         var logger = new SimpleConsoleLogger();
-        var server = new WebSocketInterfaceRpc.WebSocketInterfaceRpcServer("localhost", 9085, logger);
+        var server = new Eloe.WebSocketInterfaceRpc.WebSocketInterfaceRpcServer("localhost", 9085, logger);
         server.ImplementInterface<IServerFunctions>(new ServerInterfaceImpl());
         server.Start();
         Console.WriteLine("Server started");

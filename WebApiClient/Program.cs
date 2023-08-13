@@ -1,6 +1,6 @@
-﻿using ClientServerComDef;
+﻿using Eloe.ClientServerComDef;
 using Eloe.InterfaceRpc;
-using WebApiClient;
+using Eloe.WebApiClient;
 
 internal class Program
 {

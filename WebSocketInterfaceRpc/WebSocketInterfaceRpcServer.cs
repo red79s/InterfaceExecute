@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WatsonWebsocket;
 
-namespace WebSocketInterfaceRpc
+namespace Eloe.WebSocketInterfaceRpc
 {
     public class WebSocketInterfaceRpcServer : InterfaceRpcServerBase, IServerInfo
     {

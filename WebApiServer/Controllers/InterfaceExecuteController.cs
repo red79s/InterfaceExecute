@@ -1,7 +1,8 @@
 ﻿using Eloe.InterfaceSerializer.DataPacket;
+using Eloe.WebApiServer;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using WebApiServer.Auth;
+using Eloe.WebApiServer.Auth;
 
 namespace WebApiServer.Controllers
 {

@@ -1,4 +1,4 @@
-﻿namespace ClientServerComDef
+﻿namespace Eloe.ClientServerComDef
 {
     public interface IClientCallbackFunctions
     {

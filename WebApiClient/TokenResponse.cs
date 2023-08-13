@@ -1,4 +1,4 @@
-﻿namespace WebApiClent
+﻿namespace Eloe.WebApiClient
 {
     internal class TokenResponse
     {

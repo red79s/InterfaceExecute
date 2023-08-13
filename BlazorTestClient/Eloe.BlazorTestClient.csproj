@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClientServerComDef\ClientServerComDef.csproj" />
+    <ProjectReference Include="..\ClientServerComDef\Eloe.ClientServerComDef.csproj" />
     <ProjectReference Include="..\Eloe.InterfaceRpc\Eloe.InterfaceRpc.csproj" />
     <ProjectReference Include="..\Eloe.InterfaceSerializer\Eloe.InterfaceSerializer.csproj" />
   </ItemGroup>

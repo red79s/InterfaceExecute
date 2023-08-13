@@ -1,7 +1,7 @@
-﻿using ClientServerComDef;
+﻿using Eloe.ClientServerComDef;
 using Microsoft.AspNetCore.Authorization;
 
-namespace WebApiServer
+namespace Eloe.WebApiServer
 {
     public class ServerFunctionsImpl : IServerFunctions
     {
