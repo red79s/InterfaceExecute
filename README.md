@@ -1,2 +1,2 @@
 # InterfaceExecute
-Use generated proxy to create RPC architecture for dot net
+Use generated proxy to create RPC architecture for dotnet
